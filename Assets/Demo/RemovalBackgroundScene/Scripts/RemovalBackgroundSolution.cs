@@ -26,7 +26,6 @@ namespace asail0712.Test
             set => graphRunner.smoothSegmentation = value;
         }
 
-
         protected override IEnumerator Run()
         {
             var graphInitRequest = graphRunner.WaitForInit(runningMode);

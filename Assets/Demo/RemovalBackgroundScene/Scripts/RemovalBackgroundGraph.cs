@@ -72,7 +72,7 @@ namespace asail0712.Test
                 _segmentationMaskStream.StartPolling();
             }
 
-            StartRun(BuildSidePacket());
+            StartRun(BuildSidePacket(imageSource));
         }
 
         public override void Stop()
@@ -165,11 +165,11 @@ namespace asail0712.Test
             }
         }
 
-        private PacketMap BuildSidePacket()
+        private PacketMap BuildSidePacket(ImageSource imageSource)
         {
             var sidePacket = new PacketMap();
 
-            SetImageTransformationOptions_P(sidePacket);
+            SetImageTransformationOptions(sidePacket, imageSource);
 
             // TODO: refactoring
             // The orientation of the output image must match that of the input image.
@@ -198,30 +198,6 @@ namespace asail0712.Test
             sidePacket.Emplace("smooth_segmentation", Packet.CreateBool(smoothSegmentation));
 
             return sidePacket;
-        }
-
-        private void SetImageTransformationOptions_P(PacketMap sidePacket, bool expectedToBeMirrored = false)
-        {
-            // NOTE: The origin is left-bottom corner in Unity, and right-top corner in MediaPipe.
-            RotationAngle rotation_L = RotationAngle.Rotation0.Reverse();
-            var inputRotation = rotation_L;
-            var isInverted = ImageCoordinate.IsInverted(rotation_L);
-            var shouldBeMirrored = false ^ expectedToBeMirrored;
-            var inputHorizontallyFlipped = isInverted ^ shouldBeMirrored;
-            var inputVerticallyFlipped = !isInverted;
-
-            if ((inputHorizontallyFlipped && inputVerticallyFlipped) || rotation_L == RotationAngle.Rotation180)
-            {
-                inputRotation = inputRotation.Add(RotationAngle.Rotation180);
-                inputHorizontallyFlipped = !inputHorizontallyFlipped;
-                inputVerticallyFlipped = !inputVerticallyFlipped;
-            }
-
-            Debug.Log($"input_rotation = {inputRotation}, input_horizontally_flipped = {inputHorizontallyFlipped}, input_vertically_flipped = {inputVerticallyFlipped}");
-
-            sidePacket.Emplace("input_rotation", Packet.CreateInt((int)inputRotation));
-            sidePacket.Emplace("input_horizontally_flipped", Packet.CreateBool(inputHorizontallyFlipped));
-            sidePacket.Emplace("input_vertically_flipped", Packet.CreateBool(inputVerticallyFlipped));
         }
     }
 }
