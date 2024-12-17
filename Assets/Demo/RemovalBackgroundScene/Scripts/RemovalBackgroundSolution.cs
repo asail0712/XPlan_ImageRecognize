@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -28,8 +29,9 @@ namespace asail0712.Test
 
         protected override IEnumerator Run()
         {
-            var graphInitRequest = graphRunner.WaitForInit(runningMode);
-            var imageSource = ImageSourceProvider.ImageSource;
+            WaitForResult graphInitRequest  = graphRunner.WaitForInit(runningMode);
+            //ImageSource imageSource         = ImageSourceProvider.ImageSource;
+            ImageSource imageSource         = new WebCamTextureSource();
 
             yield return imageSource.Play();
 
@@ -64,11 +66,11 @@ namespace asail0712.Test
             graphRunner.StartRun(imageSource);
 
             AsyncGPUReadbackRequest req = default;
-            var waitUntilReqDone = new WaitUntil(() => req.done);
+            WaitUntil waitUntilReqDone  = new WaitUntil(() => req.done);
 
             // NOTE: we can share the GL context of the render thread with MediaPipe (for now, only on Android)
-            var canUseGpuImage = graphRunner.configType == GraphRunner.ConfigType.OpenGLES && GpuManager.GpuResources != null;
-            using var glContext = canUseGpuImage ? GpuManager.GetGlContext() : null;
+            bool bCanUseGpuImage        = graphRunner.configType == GraphRunner.ConfigType.OpenGLES && GpuManager.GpuResources != null;
+            using GlContext glContext   = bCanUseGpuImage ? GpuManager.GetGlContext() : null;
 
             while (true)
             {
@@ -84,7 +86,7 @@ namespace asail0712.Test
                 }
 
                 // Copy current image to TextureFrame
-                if (canUseGpuImage)
+                if (bCanUseGpuImage)
                 {
                     yield return new WaitForEndOfFrame();
                     textureFrame.ReadTextureOnGPU(imageSource.GetCurrentTexture());
@@ -107,10 +109,10 @@ namespace asail0712.Test
                 {
                     screen.ReadSync(textureFrame);
 
-                    var task = graphRunner.WaitNextAsync();
+                    Task<RemovalBackgroundResult> task = graphRunner.WaitNextAsync();
                     yield return new WaitUntil(() => task.IsCompleted);
 
-                    var result = task.Result;
+                    RemovalBackgroundResult result = task.Result;
                     _segmentationMaskAnnotationController.DrawNow(result.segmentationMask);
 
                     result.segmentationMask?.Dispose();
@@ -119,8 +121,8 @@ namespace asail0712.Test
         }
         private void OnSegmentationMaskOutput(object stream, OutputStream<ImageFrame>.OutputEventArgs eventArgs)
         {
-            var packet = eventArgs.packet;
-            var value = packet == null ? default : packet.Get();
+            Packet<ImageFrame> packet   = eventArgs.packet;
+            ImageFrame value            = packet == null ? default : packet.Get();
             _segmentationMaskAnnotationController.DrawLater(value);
             value?.Dispose();
         }
