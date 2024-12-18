@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,10 +15,7 @@ namespace asail0712.Test
 {
     public class RemovalBackgroundSolution : LegacySolutionRunner<RemovalBackgroundGraph>
     {
-        [SerializeField] private MaskAnnotationController _segmentationMaskAnnotationController;
-
         private Mediapipe.Unity.Experimental.TextureFramePool _textureFramePool;
-        private Queue<ImageFrame> imgFrameQueue;
 
         public bool enableSegmentation
         {
@@ -33,10 +31,7 @@ namespace asail0712.Test
 
         protected override IEnumerator Run()
         {
-            imgFrameQueue = new Queue<ImageFrame>();
-
             WaitForResult graphInitRequest  = graphRunner.WaitForInit(runningMode);
-            //ImageSource imageSource         = ImageSourceProvider.ImageSource;
             ImageSource imageSource         = new WebCamTextureSource();
 
             yield return imageSource.Play();
@@ -52,8 +47,7 @@ namespace asail0712.Test
             _textureFramePool = new Mediapipe.Unity.Experimental.TextureFramePool(imageSource.textureWidth, imageSource.textureHeight, TextureFormat.RGBA32, 10);
 
             // NOTE: The screen will be resized later, keeping the aspect ratio.
-            screen.Initialize(imageSource);
-            UISystem.DirectCall<Vector2>(UICommand.InitScreen, new Vector2(imageSource.textureWidth, imageSource.textureHeight));
+            UISystem.DirectCall<ImageSource>(UICommand.InitScreen, imageSource);
             
             yield return graphInitRequest;
             if (graphInitRequest.isError)
@@ -66,9 +60,6 @@ namespace asail0712.Test
             {
                 graphRunner.OnSegmentationMaskOutput += OnSegmentationMaskOutput;
             }
-
-            SetupAnnotationController(_segmentationMaskAnnotationController, imageSource);
-            _segmentationMaskAnnotationController.InitScreen(imageSource.textureWidth, imageSource.textureHeight);
 
             graphRunner.StartRun(imageSource);
 
@@ -114,40 +105,21 @@ namespace asail0712.Test
 
                 if (runningMode.IsSynchronous())
                 {
-                    screen.ReadSync(textureFrame);
-
                     Task<RemovalBackgroundResult> task = graphRunner.WaitNextAsync();
                     yield return new WaitUntil(() => task.IsCompleted);
 
                     RemovalBackgroundResult result = task.Result;
-                    _segmentationMaskAnnotationController.DrawNow(result.segmentationMask);
-
+                    UISystem.DirectCall<ImageFrame>(UICommand.UpdateMask, result.segmentationMask);
                     result.segmentationMask?.Dispose();
                 }
             }
         }
         private void OnSegmentationMaskOutput(object stream, OutputStream<ImageFrame>.OutputEventArgs eventArgs)
         {
-            Packet<ImageFrame> packet   = eventArgs.packet;
-            ImageFrame value            = packet == null ? default : packet.Get();
+            //Packet<ImageFrame> packet   = eventArgs.packet;
+            //ImageFrame value            = packet == null ? default : packet.Get();
 
-            _segmentationMaskAnnotationController.DrawLater(value);
-            imgFrameQueue.Enqueue(value);
-        }
-
-        private void LateUpdate()
-        {
-            while(imgFrameQueue != null && imgFrameQueue.Count > 0)
-            {
-                ImageFrame imgFrame = imgFrameQueue.Dequeue();
-
-                if(imgFrameQueue.Count == 0)
-                { 
-                    UISystem.DirectCall<ImageFrame>(UICommand.UpdateMask, imgFrame);
-                }
-
-                imgFrame?.Dispose();
-            }
+            //value?.Dispose();
         }
     }
 }

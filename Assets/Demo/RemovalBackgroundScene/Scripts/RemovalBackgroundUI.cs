@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 
 using UnityEngine;
@@ -18,8 +19,8 @@ namespace asail0712.Test
     {
         [SerializeField] private RawImage screen;
         [SerializeField] private Shader maskShader;
-        [SerializeField] private Color maskColor        = new Color(1f, 1f, 1f, 0f);
-        [SerializeField] private float maskThredhold    = 0.6f;
+        [SerializeField] private Color maskColor                    = new Color(1f, 1f, 1f, 0f);
+        [SerializeField, Range(0, 1)] private float maskThredhold   = 0.6f;
 
         private Material maskMaterial;
         private GraphicsBuffer maskBuffer;
@@ -44,7 +45,7 @@ namespace asail0712.Test
             /******************************
              * UI Listener
              * ****************************/
-            ListenCall<Vector2>(UICommand.InitScreen, InitUI);
+            ListenCall<ImageSource>(UICommand.InitScreen, InitUI);
             ListenCall<ImageFrame>(UICommand.UpdateMask, UpdateMask);
         }
 
@@ -64,20 +65,37 @@ namespace asail0712.Test
             maskArray = null;
         }
 
-        private void UpdateMask(ImageFrame imgFrame)
+#if UNITY_EDITOR
+        private void OnValidate()
         {
+            if (maskMaterial != null && !UnityEditor.PrefabUtility.IsPartOfAnyPrefab(this))
+            {
+                maskMaterial.SetTexture("_MaskTex", CreateMonoColorTexture(maskColor));
+                maskMaterial.SetFloat("_Threshold", maskThredhold);
+            }
+        }
+#endif
+
+        public void UpdateMask(ImageFrame imgFrame)
+        {
+            if(imgFrame == null)
+            {
+                return;
+            }
+
             // 將image frame的資料轉移到maskArray
             var _ = imgFrame.TryReadChannelNormalized(0, maskArray);
         }
 
-        private void InitUI(Vector2 vec)
+        private void InitUI(ImageSource imageSource)
         {
-            float width     = vec.x;
-            float height    = vec.y;
+            float width     = imageSource.textureWidth;
+            float height    = imageSource.textureHeight;
 
             // 設定 Screen Size
+            screen.texture                  = imageSource.GetCurrentTexture();
             screen.rectTransform.sizeDelta  = new Vector2(width, height);
-             AspectRatioFitter ratioFitter   = screen.GetComponent<AspectRatioFitter>();
+            AspectRatioFitter ratioFitter   = screen.GetComponent<AspectRatioFitter>();
 
             if (ratioFitter == null)
             {

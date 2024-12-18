@@ -124,6 +124,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   screen: {fileID: 6768629990437444769}
   maskShader: {fileID: 4800000, guid: d684c6d125278d05fbb1904ee5103f3a, type: 3}
+  maskColor: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 0}
+  maskThredhold: 0.6
 --- !u!1 &8802592907741276187
 GameObject:
   m_ObjectHideFlags: 0
