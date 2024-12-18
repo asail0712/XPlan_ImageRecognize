@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -7,6 +8,8 @@ using Mediapipe;
 using Mediapipe.Unity;
 using Mediapipe.Unity.Sample;
 
+using XPlan.UI;
+
 namespace asail0712.Test
 {
     public class RemovalBackgroundSolution : LegacySolutionRunner<RemovalBackgroundGraph>
@@ -14,6 +17,7 @@ namespace asail0712.Test
         [SerializeField] private MaskAnnotationController _segmentationMaskAnnotationController;
 
         private Mediapipe.Unity.Experimental.TextureFramePool _textureFramePool;
+        private Queue<ImageFrame> imgFrameQueue;
 
         public bool enableSegmentation
         {
@@ -29,6 +33,8 @@ namespace asail0712.Test
 
         protected override IEnumerator Run()
         {
+            imgFrameQueue = new Queue<ImageFrame>();
+
             WaitForResult graphInitRequest  = graphRunner.WaitForInit(runningMode);
             //ImageSource imageSource         = ImageSourceProvider.ImageSource;
             ImageSource imageSource         = new WebCamTextureSource();
@@ -47,6 +53,7 @@ namespace asail0712.Test
 
             // NOTE: The screen will be resized later, keeping the aspect ratio.
             screen.Initialize(imageSource);
+            UISystem.DirectCall<Vector2>(UICommand.InitScreen, new Vector2(imageSource.textureWidth, imageSource.textureHeight));
             
             yield return graphInitRequest;
             if (graphInitRequest.isError)
@@ -123,8 +130,24 @@ namespace asail0712.Test
         {
             Packet<ImageFrame> packet   = eventArgs.packet;
             ImageFrame value            = packet == null ? default : packet.Get();
+
             _segmentationMaskAnnotationController.DrawLater(value);
-            value?.Dispose();
+            imgFrameQueue.Enqueue(value);
+        }
+
+        private void LateUpdate()
+        {
+            while(imgFrameQueue != null && imgFrameQueue.Count > 0)
+            {
+                ImageFrame imgFrame = imgFrameQueue.Dequeue();
+
+                if(imgFrameQueue.Count == 0)
+                { 
+                    UISystem.DirectCall<ImageFrame>(UICommand.UpdateMask, imgFrame);
+                }
+
+                imgFrame?.Dispose();
+            }
         }
     }
 }
