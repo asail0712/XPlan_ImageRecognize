@@ -17,18 +17,6 @@ namespace asail0712.Test
     {
         private Mediapipe.Unity.Experimental.TextureFramePool _textureFramePool;
 
-        public bool enableSegmentation
-        {
-            get => graphRunner.enableSegmentation;
-            set => graphRunner.enableSegmentation = value;
-        }
-
-        public bool smoothSegmentation
-        {
-            get => graphRunner.smoothSegmentation;
-            set => graphRunner.smoothSegmentation = value;
-        }
-
         protected override IEnumerator Run()
         {
             WaitForResult graphInitRequest  = graphRunner.WaitForInit(runningMode);
@@ -116,10 +104,7 @@ namespace asail0712.Test
         }
         private void OnSegmentationMaskOutput(object stream, OutputStream<ImageFrame>.OutputEventArgs eventArgs)
         {
-            //Packet<ImageFrame> packet   = eventArgs.packet;
-            //ImageFrame value            = packet == null ? default : packet.Get();
-
-            //value?.Dispose();
+            Debug.LogError("不支援非同步顯示");
         }
     }
 }

@@ -550,12 +550,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 998770860}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 722385e4d3cc90d45b529ffa66b7e7ec, type: 3}
+  m_Script: {fileID: 11500000, guid: dc284c3ddd23e8f4b9e2ec80ff344765, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _bootstrapPrefab: {fileID: 968918444066301895, guid: 1146a9de09159a948b683e94fb3d3c95,
     type: 3}
+  screen: {fileID: 0}
   graphRunner: {fileID: 998770863}
+  runningMode: 1
 --- !u!1001 &1047940233
 PrefabInstance:
   m_ObjectHideFlags: 0
