@@ -1,14 +1,13 @@
 using System;
+using System.Collections;
 using System.Linq;
-
 using UnityEngine;
 
 using Mediapipe.Unity;
-using System.Collections;
 
 using XPlan.Utility;
 
-namespace asail0712.Test
+namespace XPlan.MediaPipe
 {
     public class WebCamTextureSource : ImageSource
     {

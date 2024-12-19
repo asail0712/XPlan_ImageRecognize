@@ -12,7 +12,7 @@ using Mediapipe.Unity;
 using Mediapipe.Unity.CoordinateSystem;
 using Mediapipe.Unity.Sample;
 
-namespace asail0712.Test
+namespace XPlan.MediaPipe
 {
     public readonly struct RemovalBackgroundResult
     {
@@ -28,9 +28,9 @@ namespace asail0712.Test
     {
         public enum ModelComplexity
         {
-            Lite = 0,
-            Full = 1,
-            Heavy = 2,
+            Lite    = 0,
+            Full    = 1,
+            Heavy   = 2,
         }
 
         private float _minDetectionConfidence = 0.5f;
@@ -47,16 +47,16 @@ namespace asail0712.Test
             set => _minTrackingConfidence = Mathf.Clamp01(value);
         }
 
-        public bool refineFaceLandmarks = false;
-        public ModelComplexity modelComplexity = ModelComplexity.Lite;
-        public bool smoothLandmarks = true;
-        public bool enableSegmentation = true;
-        public bool smoothSegmentation = true;
+        public bool refineFaceLandmarks         = false;
+        public ModelComplexity modelComplexity  = ModelComplexity.Lite;
+        public bool smoothLandmarks             = true;
+        public bool enableSegmentation          = true;
+        public bool smoothSegmentation          = true;
 
         public event EventHandler<OutputStream<ImageFrame>.OutputEventArgs> OnSegmentationMaskOutput
         {
-            add => _segmentationMaskStream.AddListener(value, timeoutMicrosec);
-            remove => _segmentationMaskStream.RemoveListener(value);
+            add     => _segmentationMaskStream.AddListener(value, timeoutMicrosec);
+            remove  => _segmentationMaskStream.RemoveListener(value);
         }
 
         private const string _InputStreamName = "input_video";
@@ -133,14 +133,14 @@ namespace asail0712.Test
             {
                 validatedGraphConfig.Initialize(config);
 
-                var extensionRegistry = new ExtensionRegistry() { TensorsToDetectionsCalculatorOptions.Extensions.Ext, ThresholdingCalculatorOptions.Extensions.Ext };
-                var cannonicalizedConfig = validatedGraphConfig.Config(extensionRegistry);
+                var extensionRegistry       = new ExtensionRegistry() { TensorsToDetectionsCalculatorOptions.Extensions.Ext, ThresholdingCalculatorOptions.Extensions.Ext };
+                var cannonicalizedConfig    = validatedGraphConfig.Config(extensionRegistry);
 
                 var poseDetectionCalculatorPattern = new Regex("__posedetection[a-z]+__TensorsToDetectionsCalculator$");
                 var tensorsToDetectionsCalculators = cannonicalizedConfig.Node.Where((node) => poseDetectionCalculatorPattern.Match(node.Name).Success).ToList();
 
-                var poseTrackingCalculatorPattern = new Regex("tensorstoposelandmarksandsegmentation__ThresholdingCalculator$");
-                var thresholdingCalculators = cannonicalizedConfig.Node.Where((node) => poseTrackingCalculatorPattern.Match(node.Name).Success).ToList();
+                var poseTrackingCalculatorPattern   = new Regex("tensorstoposelandmarksandsegmentation__ThresholdingCalculator$");
+                var thresholdingCalculators         = cannonicalizedConfig.Node.Where((node) => poseTrackingCalculatorPattern.Match(node.Name).Success).ToList();
 
                 foreach (var calculator in tensorsToDetectionsCalculators)
                 {
@@ -156,8 +156,8 @@ namespace asail0712.Test
                 {
                     if (calculator.Options.HasExtension(ThresholdingCalculatorOptions.Extensions.Ext))
                     {
-                        var options = calculator.Options.GetExtension(ThresholdingCalculatorOptions.Extensions.Ext);
-                        options.Threshold = minTrackingConfidence;
+                        var options         = calculator.Options.GetExtension(ThresholdingCalculatorOptions.Extensions.Ext);
+                        options.Threshold   = minTrackingConfidence;
                         Debug.Log($"Min Tracking Confidence = {minTrackingConfidence}");
                     }
                 }
@@ -173,16 +173,16 @@ namespace asail0712.Test
 
             // TODO: refactoring
             // The orientation of the output image must match that of the input image.
-            var isInverted = ImageCoordinate.IsInverted(RotationAngle.Rotation0);
-            var outputRotation = RotationAngle.Rotation0;
-            var outputHorizontallyFlipped = !isInverted && false;
-            var outputVerticallyFlipped = (!runningMode.IsSynchronous() && false) ^ (isInverted && false);
+            var isInverted                  = ImageCoordinate.IsInverted(RotationAngle.Rotation0);
+            var outputRotation              = RotationAngle.Rotation0;
+            var outputHorizontallyFlipped   = !isInverted && false;
+            var outputVerticallyFlipped     = (!runningMode.IsSynchronous() && false) ^ (isInverted && false);
 
             if ((outputHorizontallyFlipped && outputVerticallyFlipped) || outputRotation == RotationAngle.Rotation180)
             {
-                outputRotation = outputRotation.Add(RotationAngle.Rotation180);
-                outputHorizontallyFlipped = !outputHorizontallyFlipped;
-                outputVerticallyFlipped = !outputVerticallyFlipped;
+                outputRotation              = outputRotation.Add(RotationAngle.Rotation180);
+                outputHorizontallyFlipped   = !outputHorizontallyFlipped;
+                outputVerticallyFlipped     = !outputVerticallyFlipped;
             }
 
             sidePacket.Emplace("output_rotation", Packet.CreateInt((int)outputRotation));

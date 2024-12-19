@@ -11,8 +11,14 @@ using Mediapipe.Unity.Sample;
 
 using XPlan.UI;
 
-namespace asail0712.Test
+namespace XPlan.MediaPipe
 {
+    public static class UIMediaPipeCommand
+    {
+        public const string InitScreen = "InitScreen";
+        public const string UpdateMask = "UpdateMask";
+    }
+
     public class RemovalBackgroundSolution : LegacySolutionRunner<RemovalBackgroundGraph>
     {
         private Mediapipe.Unity.Experimental.TextureFramePool _textureFramePool;
@@ -35,7 +41,7 @@ namespace asail0712.Test
             _textureFramePool = new Mediapipe.Unity.Experimental.TextureFramePool(imageSource.textureWidth, imageSource.textureHeight, TextureFormat.RGBA32, 10);
 
             // NOTE: The screen will be resized later, keeping the aspect ratio.
-            UISystem.DirectCall<ImageSource>(UICommand.InitScreen, imageSource);
+            UISystem.DirectCall<ImageSource>(UIMediaPipeCommand.InitScreen, imageSource);
             
             yield return graphInitRequest;
             if (graphInitRequest.isError)
@@ -97,7 +103,7 @@ namespace asail0712.Test
                     yield return new WaitUntil(() => task.IsCompleted);
 
                     RemovalBackgroundResult result = task.Result;
-                    UISystem.DirectCall<ImageFrame>(UICommand.UpdateMask, result.segmentationMask);
+                    UISystem.DirectCall<ImageFrame>(UIMediaPipeCommand.UpdateMask, result.segmentationMask);
                     result.segmentationMask?.Dispose();
                 }
             }

@@ -11,9 +11,10 @@ using Color = UnityEngine.Color;
 using Mediapipe;
 using Mediapipe.Unity;
 
+using XPlan.MediaPipe;
 using XPlan.UI;
 
-namespace asail0712.Test
+namespace XPlan.Demo
 {
     public class RemovalBackgroundUI : UIBase
     {
@@ -45,8 +46,8 @@ namespace asail0712.Test
             /******************************
              * UI Listener
              * ****************************/
-            ListenCall<ImageSource>(UICommand.InitScreen, InitUI);
-            ListenCall<ImageFrame>(UICommand.UpdateMask, UpdateMask);
+            ListenCall<ImageSource>(UIMediaPipeCommand.InitScreen, InitUI);
+            ListenCall<ImageFrame>(UIMediaPipeCommand.UpdateMask, UpdateMask);
         }
 
         private void LateUpdate()
