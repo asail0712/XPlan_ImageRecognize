@@ -6,6 +6,7 @@
 - Unity 6.0.0.0 或更高版本
 - [MediaPipe Unity Plugins 0.15.0](https://github.com/homuler/MediaPipeUnityPlugin)
 - [XPlan 2.0.2](https://github.com/asail0712/XPlanDemo)
+- 執行時會跳出"(are you missing an assembly reference?)"錯誤訊息，請參考[Installation-Guide](https://github.com/homuler/MediaPipeUnityPlugin/wiki/Installation-Guide)生成Library，或是去[Releases Page](https://github.com/homuler/MediaPipeUnityPlugin/releases)做完整下載
 ### 安裝指南
 使用Unity開啟這個項目。
 需要配備攝影機。
@@ -27,3 +28,4 @@ Email: asail0712@gmail.com
 # 7. 附加資源
 ### 感謝
 - [MediaPipe Unity Plugins 0.15.0](https://github.com/homuler/MediaPipeUnityPlugin)
+- [MetU](https://github.com/GanniPiece/MetU)
