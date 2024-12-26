@@ -1,5 +1,5 @@
 # 1.簡介
-使用個人撰寫的Framework "XPlan"建立的Demo，主要演示透過MediaPipe的衍伸應用。
+使用Framework "XPlan"建立的影像辨識Demo，主要演示MediaPipe的衍伸應用。
  
 # 2.安裝指南
 ### 系統要求
@@ -29,3 +29,4 @@ Email: asail0712@gmail.com
 ### 感謝
 - [MediaPipe Unity Plugins 0.15.0](https://github.com/homuler/MediaPipeUnityPlugin)
 - [MetU](https://github.com/GanniPiece/MetU)
+- [Framework XPlan](https://github.com/asail0712/XPlanDemo)
