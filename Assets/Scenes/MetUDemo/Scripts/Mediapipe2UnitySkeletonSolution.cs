@@ -1,8 +1,9 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-using Mediapipe.Unity;
+using Google.Protobuf.Collections;
 
 namespace Mediapipe.Unity.Sample.Holistic
 {
@@ -17,7 +18,11 @@ namespace Mediapipe.Unity.Sample.Holistic
         [SerializeField] private PoseWorldLandmarkListAnnotationController _poseWorldLandmarksAnnotationController;
         [SerializeField] private Mediapipe2UnitySkeletonController _mediapipe2UnitySkeletonController;
 
+        [SerializeField] private GameObject fittingAvatar;
+
         private Experimental.TextureFramePool _textureFramePool;
+        private Vector3 keyPoint;
+        private GameObject hipAnchor;
 
         public HolisticTrackingGraph.ModelComplexity modelComplexity
         {
@@ -63,6 +68,9 @@ namespace Mediapipe.Unity.Sample.Holistic
 
         protected override IEnumerator Run()
         {
+            hipAnchor = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            hipAnchor.transform.Rotate(new Vector3(90, 0, 0));
+
             var graphInitRequest    = graphRunner.WaitForInit(runningMode);
             var imageSource         = ImageSourceProvider.ImageSource;
 
@@ -90,7 +98,8 @@ namespace Mediapipe.Unity.Sample.Holistic
 
             if (!runningMode.IsSynchronous())
             {
-                graphRunner.OnPoseWorldLandmarksOutput += OnPoseWorldLandmarksOutput;
+                graphRunner.OnPoseWorldLandmarksOutput  += OnPoseWorldLandmarksOutput;
+                graphRunner.OnPoseLandmarksOutput       += OnPoseLandmarksOutput;
             }
 
             SetupAnnotationController(_poseWorldLandmarksAnnotationController, imageSource);
@@ -161,6 +170,45 @@ namespace Mediapipe.Unity.Sample.Holistic
 
             _poseWorldLandmarksAnnotationController.DrawLater(value);
             _mediapipe2UnitySkeletonController.Refresh(value);
+        }
+
+        private void OnPoseLandmarksOutput(object stream, OutputStream<NormalizedLandmarkList>.OutputEventArgs eventArgs)
+        {
+            var packet  = eventArgs.packet;
+            var value   = packet == null ? default : packet.Get(NormalizedLandmarkList.Parser);
+
+            if(value == null)
+            {
+                return;
+            }
+
+            NormalizedLandmarkList nlmList              = value;
+            RepeatedField<NormalizedLandmark> lmList    = nlmList.Landmark;
+
+            NormalizedLandmark leftHip  = lmList[23];
+            NormalizedLandmark rightHip = lmList[24];
+
+            keyPoint = new Vector3(1 - (leftHip.X + rightHip.X) / 2f, 1 - (leftHip.Y + rightHip.Y) / 2f, (leftHip.Z + rightHip.Z) / 2f);
+        }
+
+        void LateUpdate()
+        {
+            if (keyPoint == null || hipAnchor == null || fittingAvatar == null)
+            {
+                return;
+            }
+
+            GUIStyle style = new GUIStyle();
+            style.fontSize = 60;
+
+            // Screen 0,0 在左下角
+            Vector3 hipScreenPos    = new Vector3(keyPoint.x * UnityEngine.Screen.width, keyPoint.y * UnityEngine.Screen.height, 10f);
+            Vector3 hipWorldPos     = Camera.main.ScreenToWorldPoint(hipScreenPos);
+
+            hipAnchor.transform.position    = hipWorldPos;
+            hipAnchor.transform.localScale  = Vector3.one * 1f; // 设置球体的大小
+
+            fittingAvatar.transform.position = hipWorldPos;
         }
     }
 }
