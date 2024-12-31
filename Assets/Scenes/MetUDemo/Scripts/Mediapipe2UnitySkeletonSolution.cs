@@ -22,7 +22,7 @@ namespace Mediapipe.Unity.Sample.Holistic
 
         private Experimental.TextureFramePool _textureFramePool;
         private Vector3 keyPoint;
-        private GameObject hipAnchor;
+        //private GameObject hipAnchor;
 
         public HolisticTrackingGraph.ModelComplexity modelComplexity
         {
@@ -68,8 +68,8 @@ namespace Mediapipe.Unity.Sample.Holistic
 
         protected override IEnumerator Run()
         {
-            hipAnchor = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            hipAnchor.transform.Rotate(new Vector3(90, 0, 0));
+            //hipAnchor = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            //hipAnchor.transform.Rotate(new Vector3(90, 0, 0));
 
             var graphInitRequest    = graphRunner.WaitForInit(runningMode);
             var imageSource         = ImageSourceProvider.ImageSource;
@@ -188,12 +188,12 @@ namespace Mediapipe.Unity.Sample.Holistic
             NormalizedLandmark leftHip  = lmList[23];
             NormalizedLandmark rightHip = lmList[24];
 
-            keyPoint = new Vector3(1 - (leftHip.X + rightHip.X) / 2f, 1 - (leftHip.Y + rightHip.Y) / 2f, (leftHip.Z + rightHip.Z) / 2f);
+            keyPoint = new Vector3((leftHip.X + rightHip.X) / 2f, 1 - (leftHip.Y + rightHip.Y) / 2f, (leftHip.Z + rightHip.Z) / 2f);
         }
 
         void LateUpdate()
         {
-            if (keyPoint == null || hipAnchor == null || fittingAvatar == null)
+            if (keyPoint == null || fittingAvatar == null)
             {
                 return;
             }
@@ -205,8 +205,8 @@ namespace Mediapipe.Unity.Sample.Holistic
             Vector3 hipScreenPos    = new Vector3(keyPoint.x * UnityEngine.Screen.width, keyPoint.y * UnityEngine.Screen.height, 10f);
             Vector3 hipWorldPos     = Camera.main.ScreenToWorldPoint(hipScreenPos);
 
-            hipAnchor.transform.position    = hipWorldPos;
-            hipAnchor.transform.localScale  = Vector3.one * 1f; // 设置球体的大小
+            //hipAnchor.transform.position    = hipWorldPos;
+            //hipAnchor.transform.localScale  = Vector3.one * 1f; // 设置球体的大小
 
             fittingAvatar.transform.position = hipWorldPos;
         }
