@@ -19,6 +19,7 @@ namespace Mediapipe.Unity.Sample.Holistic
         [SerializeField] private Mediapipe2UnitySkeletonController _mediapipe2UnitySkeletonController;
 
         [SerializeField] private GameObject fittingAvatar;
+        [SerializeField] private AvatarScaler avatarScaler;
 
         private Experimental.TextureFramePool _textureFramePool;
         private Vector3 keyPoint;
@@ -189,6 +190,8 @@ namespace Mediapipe.Unity.Sample.Holistic
             NormalizedLandmark rightHip = lmList[24];
 
             keyPoint = new Vector3((leftHip.X + rightHip.X) / 2f, 1 - (leftHip.Y + rightHip.Y) / 2f, (leftHip.Z + rightHip.Z) / 2f);
+
+            avatarScaler.SetLandmark(lmList);
         }
 
         void LateUpdate()
@@ -198,9 +201,6 @@ namespace Mediapipe.Unity.Sample.Holistic
                 return;
             }
 
-            GUIStyle style = new GUIStyle();
-            style.fontSize = 60;
-
             // Screen 0,0 在左下角
             Vector3 hipScreenPos    = new Vector3(keyPoint.x * UnityEngine.Screen.width, keyPoint.y * UnityEngine.Screen.height, 10f);
             Vector3 hipWorldPos     = Camera.main.ScreenToWorldPoint(hipScreenPos);
@@ -208,7 +208,7 @@ namespace Mediapipe.Unity.Sample.Holistic
             //hipAnchor.transform.position    = hipWorldPos;
             //hipAnchor.transform.localScale  = Vector3.one * 1f; // 设置球体的大小
 
-            fittingAvatar.transform.position = hipWorldPos;
+            fittingAvatar.transform.position = hipWorldPos;            
         }
     }
 }
