@@ -12,7 +12,7 @@ using Mediapipe.Unity;
 using Mediapipe.Unity.CoordinateSystem;
 using Mediapipe.Unity.Sample;
 
-namespace XPlan.MediaPipe
+namespace XPlan.MediaPipe.RemovalBackground
 {
     public readonly struct RemovalBackgroundResult
     {
@@ -33,19 +33,19 @@ namespace XPlan.MediaPipe
             Heavy   = 2,
         }
 
-        private float _minDetectionConfidence = 0.5f;
-        public float minDetectionConfidence
-        {
-            get => _minDetectionConfidence;
-            set => _minDetectionConfidence = Mathf.Clamp01(value);
-        }
+        //private float _minDetectionConfidence = 0.5f;
+        //public float minDetectionConfidence
+        //{
+        //    get => _minDetectionConfidence;
+        //    set => _minDetectionConfidence = Mathf.Clamp01(value);
+        //}
 
-        private float _minTrackingConfidence = 0.5f;
-        public float minTrackingConfidence
-        {
-            get => _minTrackingConfidence;
-            set => _minTrackingConfidence = Mathf.Clamp01(value);
-        }
+        //private float _minTrackingConfidence = 0.5f;
+        //public float minTrackingConfidence
+        //{
+        //    get => _minTrackingConfidence;
+        //    set => _minTrackingConfidence = Mathf.Clamp01(value);
+        //}
 
         public bool refineFaceLandmarks         = false;
         public ModelComplexity modelComplexity  = ModelComplexity.Lite;
@@ -59,8 +59,8 @@ namespace XPlan.MediaPipe
             remove  => _segmentationMaskStream.RemoveListener(value);
         }
 
-        private const string _InputStreamName = "input_video";
-        private const string _SegmentationMaskStreamName = "segmentation_mask";
+        private const string _InputStreamName               = "input_video";
+        private const string _SegmentationMaskStreamName    = "segmentation_mask";
 
         private OutputStream<ImageFrame> _segmentationMaskStream;
 
@@ -136,31 +136,31 @@ namespace XPlan.MediaPipe
                 var extensionRegistry       = new ExtensionRegistry() { TensorsToDetectionsCalculatorOptions.Extensions.Ext, ThresholdingCalculatorOptions.Extensions.Ext };
                 var cannonicalizedConfig    = validatedGraphConfig.Config(extensionRegistry);
 
-                var poseDetectionCalculatorPattern = new Regex("__posedetection[a-z]+__TensorsToDetectionsCalculator$");
-                var tensorsToDetectionsCalculators = cannonicalizedConfig.Node.Where((node) => poseDetectionCalculatorPattern.Match(node.Name).Success).ToList();
+                //var poseDetectionCalculatorPattern = new Regex("__posedetection[a-z]+__TensorsToDetectionsCalculator$");
+                //var tensorsToDetectionsCalculators = cannonicalizedConfig.Node.Where((node) => poseDetectionCalculatorPattern.Match(node.Name).Success).ToList();
 
-                var poseTrackingCalculatorPattern   = new Regex("tensorstoposelandmarksandsegmentation__ThresholdingCalculator$");
-                var thresholdingCalculators         = cannonicalizedConfig.Node.Where((node) => poseTrackingCalculatorPattern.Match(node.Name).Success).ToList();
+                //var poseTrackingCalculatorPattern   = new Regex("tensorstoposelandmarksandsegmentation__ThresholdingCalculator$");
+                //var thresholdingCalculators         = cannonicalizedConfig.Node.Where((node) => poseTrackingCalculatorPattern.Match(node.Name).Success).ToList();
 
-                foreach (var calculator in tensorsToDetectionsCalculators)
-                {
-                    if (calculator.Options.HasExtension(TensorsToDetectionsCalculatorOptions.Extensions.Ext))
-                    {
-                        var options = calculator.Options.GetExtension(TensorsToDetectionsCalculatorOptions.Extensions.Ext);
-                        options.MinScoreThresh = minDetectionConfidence;
-                        Debug.Log($"Min Detection Confidence = {minDetectionConfidence}");
-                    }
-                }
+                //foreach (var calculator in tensorsToDetectionsCalculators)
+                //{
+                //    if (calculator.Options.HasExtension(TensorsToDetectionsCalculatorOptions.Extensions.Ext))
+                //    {
+                //        var options             = calculator.Options.GetExtension(TensorsToDetectionsCalculatorOptions.Extensions.Ext);
+                //        options.MinScoreThresh  = minDetectionConfidence;
+                //        Debug.Log($"Min Detection Confidence = {minDetectionConfidence}");
+                //    }
+                //}
 
-                foreach (var calculator in thresholdingCalculators)
-                {
-                    if (calculator.Options.HasExtension(ThresholdingCalculatorOptions.Extensions.Ext))
-                    {
-                        var options         = calculator.Options.GetExtension(ThresholdingCalculatorOptions.Extensions.Ext);
-                        options.Threshold   = minTrackingConfidence;
-                        Debug.Log($"Min Tracking Confidence = {minTrackingConfidence}");
-                    }
-                }
+                //foreach (var calculator in thresholdingCalculators)
+                //{
+                //    if (calculator.Options.HasExtension(ThresholdingCalculatorOptions.Extensions.Ext))
+                //    {
+                //        var options         = calculator.Options.GetExtension(ThresholdingCalculatorOptions.Extensions.Ext);
+                //        options.Threshold   = minTrackingConfidence;
+                //        Debug.Log($"Min Tracking Confidence = {minTrackingConfidence}");
+                //    }
+                //}
                 calculatorGraph.Initialize(cannonicalizedConfig);
             }
         }

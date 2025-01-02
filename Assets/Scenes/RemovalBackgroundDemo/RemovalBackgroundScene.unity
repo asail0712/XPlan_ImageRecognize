@@ -594,11 +594,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 2894942979574725029, guid: 0070750a65d1e6d47819d59ccef64e93,
-        type: 3}
-      propertyPath: runningMode
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 3520026042623860395, guid: 0070750a65d1e6d47819d59ccef64e93,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -652,7 +647,7 @@ PrefabInstance:
     - target: {fileID: 8169079796892582444, guid: 0070750a65d1e6d47819d59ccef64e93,
         type: 3}
       propertyPath: m_Name
-      value: RemovealBackgroundSolution
+      value: RemovealBackground
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

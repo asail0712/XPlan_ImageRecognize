@@ -46,8 +46,8 @@ namespace XPlan.Demo
             /******************************
              * UI Listener
              * ****************************/
-            ListenCall<ImageSource>(UIMediaPipeCommand.InitScreen, InitUI);
-            ListenCall<ImageFrame>(UIMediaPipeCommand.UpdateMask, UpdateMask);
+            ListenCall<ImageSource>(UICommand.InitScreen, InitUI);
+            ListenCall<ImageFrame>(UICommand.UpdateMask, UpdateMask);
         }
 
         private void LateUpdate()

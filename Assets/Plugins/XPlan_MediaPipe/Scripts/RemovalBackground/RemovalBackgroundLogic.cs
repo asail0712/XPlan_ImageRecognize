@@ -9,41 +9,32 @@ using Mediapipe;
 using Mediapipe.Unity;
 using Mediapipe.Unity.Sample;
 
+using XPlan.Observe;
 using XPlan.UI;
 
+using TextureFramePool = Mediapipe.Unity.Experimental.TextureFramePool;
+
 namespace XPlan.MediaPipe.RemovalBackground
-{
-
-    public class RemovalBackgroundSolution : LegacySolutionRunner<RemovalBackgroundGraph>
+{    
+    public class RemovalBackgroundLogic : LogicComponent
     {
-        private Mediapipe.Unity.Experimental.TextureFramePool _textureFramePool;
-
-        protected override IEnumerator Run()
+        public RemovalBackgroundLogic()
         {
-            WaitForResult graphInitRequest  = graphRunner.WaitForInit(runningMode);
-            ImageSource imageSource         = new WebCamTextureSource();
-
-            yield return imageSource.Play();
-
-            if (!imageSource.isPrepared)
+            RegisterNotify<PrepareFinishMsg>((msg) => 
             {
-                Debug.LogError("Failed to start ImageSource, exiting...");
-                yield break;
-            }
+                RunningMode runningMode             = msg.runningMode;
+                RemovalBackgroundGraph graphRunner  = (RemovalBackgroundGraph)msg.graphRunner;
+                ImageSource imageSource             = msg.imageSource;
 
+                StartCoroutine(Run(graphRunner, runningMode, imageSource));
+            });
+        }
+
+        protected IEnumerator Run(RemovalBackgroundGraph graphRunner, RunningMode runningMode, ImageSource imageSource)
+        {
             // Use RGBA32 as the input format.
             // TODO: When using GpuBuffer, MediaPipe assumes that the input format is BGRA, so the following code must be fixed.
-            _textureFramePool = new Mediapipe.Unity.Experimental.TextureFramePool(imageSource.textureWidth, imageSource.textureHeight, TextureFormat.RGBA32, 10);
-
-            // NOTE: The screen will be resized later, keeping the aspect ratio.
-            UISystem.DirectCall<ImageSource>(UICommand.InitScreen, imageSource);
-            
-            yield return graphInitRequest;
-            if (graphInitRequest.isError)
-            {
-                Debug.LogError(graphInitRequest.error);
-                yield break;
-            }
+            TextureFramePool textureFramePool = new TextureFramePool(imageSource.textureWidth, imageSource.textureHeight, TextureFormat.RGBA32, 10);
 
             if (!runningMode.IsSynchronous())
             {
@@ -61,12 +52,7 @@ namespace XPlan.MediaPipe.RemovalBackground
 
             while (true)
             {
-                if (isPaused)
-                {
-                    yield return new WaitWhile(() => isPaused);
-                }
-
-                if (!_textureFramePool.TryGetTextureFrame(out var textureFrame))
+                if (!textureFramePool.TryGetTextureFrame(out var textureFrame))
                 {
                     yield return new WaitForEndOfFrame();
                     continue;
@@ -105,10 +91,9 @@ namespace XPlan.MediaPipe.RemovalBackground
         }
         private void OnSegmentationMaskOutput(object stream, OutputStream<ImageFrame>.OutputEventArgs eventArgs)
         {
-            var packet = eventArgs.packet;
-            var value = packet == null ? default : packet.Get();
+            Packet<ImageFrame> packet   = eventArgs.packet;
+            ImageFrame value            = packet == null ? default : packet.Get();
             
-            //Debug.LogError("不支援非同步顯示");
             UISystem.DirectCall<ImageFrame>(UICommand.UpdateMask, value);
 
             value?.Dispose();

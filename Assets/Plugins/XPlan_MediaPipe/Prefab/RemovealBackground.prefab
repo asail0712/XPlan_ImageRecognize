@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 3520026042623860395}
   - component: {fileID: 3229729137168015645}
-  - component: {fileID: 2894942979574725029}
+  - component: {fileID: 5189396974636613187}
   m_Layer: 0
-  m_Name: RemovealBackgroundSolution
+  m_Name: RemovealBackground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -54,7 +54,7 @@ MonoBehaviour:
   smoothLandmarks: 1
   enableSegmentation: 1
   smoothSegmentation: 1
---- !u!114 &2894942979574725029
+--- !u!114 &5189396974636613187
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -63,11 +63,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 8169079796892582444}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc284c3ddd23e8f4b9e2ec80ff344765, type: 3}
+  m_Script: {fileID: 11500000, guid: 4438248dd26fa2248a501273855bf509, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _bootstrapPrefab: {fileID: 968918444066301895, guid: 1146a9de09159a948b683e94fb3d3c95,
+  bootstrapPrefab: {fileID: 968918444066301895, guid: 1146a9de09159a948b683e94fb3d3c95,
     type: 3}
-  screen: {fileID: 0}
   graphRunner: {fileID: 3229729137168015645}
-  runningMode: 1
+  runningMode: 0
