@@ -90,6 +90,9 @@ namespace XPlan.Demo
 
         private void InitUI(ImageSource imageSource)
         {
+            // 執行命令的UI，一定要設定為enable
+            gameObject.SetActive(true);
+
             float width     = imageSource.textureWidth;
             float height    = imageSource.textureHeight;
 

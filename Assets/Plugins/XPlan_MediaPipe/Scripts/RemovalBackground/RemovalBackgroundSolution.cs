@@ -110,7 +110,13 @@ namespace XPlan.MediaPipe
         }
         private void OnSegmentationMaskOutput(object stream, OutputStream<ImageFrame>.OutputEventArgs eventArgs)
         {
-            Debug.LogError("不支援非同步顯示");
+            var packet = eventArgs.packet;
+            var value = packet == null ? default : packet.Get();
+            
+            //Debug.LogError("不支援非同步顯示");
+            UISystem.DirectCall<ImageFrame>(UIMediaPipeCommand.UpdateMask, value);
+
+            value?.Dispose();
         }
     }
 }
