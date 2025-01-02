@@ -12,6 +12,8 @@ using Mediapipe.Unity;
 using Mediapipe.Unity.CoordinateSystem;
 using Mediapipe.Unity.Sample;
 
+using TextureFrame = Mediapipe.Unity.Experimental.TextureFrame;
+
 namespace XPlan.MediaPipe.RemovalBackground
 {
     public readonly struct RemovalBackgroundResult
@@ -81,7 +83,7 @@ namespace XPlan.MediaPipe.RemovalBackground
             _segmentationMaskStream = null;
         }
 
-        public void AddTextureFrameToInputStream(Mediapipe.Unity.Experimental.TextureFrame textureFrame, GlContext glContext = null)
+        public void AddTextureFrameToInputStream(TextureFrame textureFrame, GlContext glContext = null)
         {
             AddTextureFrameToInputStream(_InputStreamName, textureFrame, glContext);
         }

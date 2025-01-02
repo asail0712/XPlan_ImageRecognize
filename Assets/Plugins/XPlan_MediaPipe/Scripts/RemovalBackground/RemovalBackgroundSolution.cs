@@ -11,12 +11,14 @@ using Mediapipe.Unity.Sample;
 
 using XPlan.UI;
 
+using TextureFramePool = Mediapipe.Unity.Experimental.TextureFramePool;
+
 namespace XPlan.MediaPipe.RemovalBackground
 {
 
     public class RemovalBackgroundSolution : LegacySolutionRunner<RemovalBackgroundGraph>
     {
-        private Mediapipe.Unity.Experimental.TextureFramePool _textureFramePool;
+        private TextureFramePool _textureFramePool;
 
         protected override IEnumerator Run()
         {
@@ -33,7 +35,7 @@ namespace XPlan.MediaPipe.RemovalBackground
 
             // Use RGBA32 as the input format.
             // TODO: When using GpuBuffer, MediaPipe assumes that the input format is BGRA, so the following code must be fixed.
-            _textureFramePool = new Mediapipe.Unity.Experimental.TextureFramePool(imageSource.textureWidth, imageSource.textureHeight, TextureFormat.RGBA32, 10);
+            _textureFramePool = new TextureFramePool(imageSource.textureWidth, imageSource.textureHeight, TextureFormat.RGBA32, 10);
 
             // NOTE: The screen will be resized later, keeping the aspect ratio.
             UISystem.DirectCall<ImageSource>(UICommand.InitScreen, imageSource);
