@@ -14,25 +14,23 @@ using TextureFramePool = Mediapipe.Unity.Experimental.TextureFramePool;
 
 namespace XPlan.MediaPipe
 {    
-    public class PrepareFinishMsg : MessageBase
+    public class GraphRunnerPrepareMsg : MessageBase
     {
         public GraphRunner graphRunner;
         public RunningMode runningMode;
-        public ImageSource imageSource;
 
-        public PrepareFinishMsg(GraphRunner graphRunner, RunningMode runningMode, ImageSource imageSource)
+        public GraphRunnerPrepareMsg(GraphRunner graphRunner, RunningMode runningMode)
         {
             this.graphRunner = graphRunner;
             this.runningMode = runningMode;
-            this.imageSource = imageSource;
         }
     }
 
-    public class MediaPipeInitial : LogicComponent
+    public class GraphRunnerInitial : LogicComponent
     {
         private static readonly string _BootstrapName = nameof(Bootstrap);
 
-        public MediaPipeInitial(GraphRunner graphRunner, RunningMode runningMode, GameObject bootstrapPrefab)
+        public GraphRunnerInitial(GraphRunner graphRunner, RunningMode runningMode, GameObject bootstrapPrefab)
         {
             StartCoroutine(Run(graphRunner, runningMode, bootstrapPrefab));
         }
@@ -55,21 +53,8 @@ namespace XPlan.MediaPipe
                 yield break;
             }
 
-            // 等待攝像機初始化
-            ImageSource imageSource         = new WebCamTextureSource();
-            yield return imageSource.Play();
-
-            if (!imageSource.isPrepared)
-            {
-                Debug.LogError("Failed to start ImageSource, exiting...");
-                yield break;
-            }
-
-            // 初始化UI
-            UISystem.DirectCall<ImageSource>(UICommand.InitScreen, imageSource);
-
             // 將初始化的結果送出
-            SendMsg<PrepareFinishMsg>(graphRunner, runningMode, imageSource);
+            SendMsg<GraphRunnerPrepareMsg>(graphRunner, runningMode);
         }
     }
 }

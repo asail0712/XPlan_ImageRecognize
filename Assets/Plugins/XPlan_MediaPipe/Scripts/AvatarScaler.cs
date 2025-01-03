@@ -16,7 +16,7 @@ namespace XPlan.MediaPipe
         public float bodyScaleFactor = 1f;
 
         [Tooltip("Body width scale factor that may be used for fine tuning of model-width scale.")]
-        [Range(0.0f, 2.0f)]
+        [Range(0.0f, 20.0f)]
         public float bodyWidthFactor = 0f;
         
         [Tooltip("Additional scale factor for arms that may be used for fine tuning of model arm-scale.")]

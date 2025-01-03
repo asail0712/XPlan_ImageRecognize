@@ -10,9 +10,10 @@ using Mediapipe.Unity;
 using Mediapipe.Unity.Sample.Holistic;
 
 using XPlan;
-using XPlan.UI;
+using XPlan.MediaPipe;
+using XPlan.MediaPipe.FittingRoom;
 
-namespace XPlan.MediaPipe.FittingRoom
+namespace XPlan.Demo
 {    
     public class FittingRoomSystem : SystemBase
     {
@@ -29,7 +30,8 @@ namespace XPlan.MediaPipe.FittingRoom
 
         protected override void OnInitialLogic()
         {
-            RegisterLogic(new MediaPipeInitial(graphRunner, runningMode, bootstrapPrefab));
+            RegisterLogic(new GraphRunnerInitial(graphRunner, runningMode, bootstrapPrefab));
+            RegisterLogic(new CamTextureInitial());
             RegisterLogic(new FittingRoomLogic(fittingAvatarGO));
         }
     }

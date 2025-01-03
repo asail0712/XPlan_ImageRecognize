@@ -10,9 +10,10 @@ using Mediapipe.Unity;
 using Mediapipe.Unity.Sample;
 
 using XPlan;
-using XPlan.UI;
+using XPlan.MediaPipe;
+using XPlan.MediaPipe.RemovalBackground;
 
-namespace XPlan.MediaPipe.RemovalBackground
+namespace XPlan.Demo
 {    
     public class RemovalBackgroundSystem : SystemBase
     {
@@ -27,7 +28,8 @@ namespace XPlan.MediaPipe.RemovalBackground
 
         protected override void OnInitialLogic()
         {
-            RegisterLogic(new MediaPipeInitial(graphRunner, runningMode, bootstrapPrefab));
+            RegisterLogic(new GraphRunnerInitial(graphRunner, runningMode, bootstrapPrefab));
+            RegisterLogic(new CamTextureInitial());
             RegisterLogic(new RemovalBackgroundLogic());
         }
     }

@@ -25,20 +25,40 @@ namespace XPlan.MediaPipe.FittingRoom
         private GameObject fittingAvatarGO;
         private Vector3 keyPoint;
 
+        HolisticTrackingGraph graphRunner;
+        RunningMode runningMode;
+        ImageSource imageSource;
+
         public FittingRoomLogic(GameObject fittingAvatarGO)
         {
             this.fittingAvatarGO    = fittingAvatarGO;
             this.avatarScaler       = fittingAvatarGO.GetComponent<AvatarScaler>();
             this.avatarFitting      = fittingAvatarGO.GetComponent<AvatarFitting>();
 
-            RegisterNotify<PrepareFinishMsg>((msg) => 
+            RegisterNotify<GraphRunnerPrepareMsg>((msg) =>
             {
-                RunningMode runningMode             = msg.runningMode;
-                HolisticTrackingGraph graphRunner  = (HolisticTrackingGraph)msg.graphRunner;
-                ImageSource imageSource             = msg.imageSource;
+                runningMode = msg.runningMode;
+                graphRunner = (HolisticTrackingGraph)msg.graphRunner;
 
-                StartCoroutine(Run(graphRunner, runningMode, imageSource));
+                StartRun();
             });
+
+            RegisterNotify<CamTexturePrepareMsg>((msg) =>
+            {
+                imageSource = msg.imageSource;
+
+                StartRun();
+            });
+        }
+
+        private void StartRun()
+        {
+            if (graphRunner == null || imageSource == null)
+            {
+                return;
+            }
+
+            StartCoroutine(Run(graphRunner, runningMode, imageSource));
         }
 
         protected IEnumerator Run(HolisticTrackingGraph graphRunner, RunningMode runningMode, ImageSource imageSource)

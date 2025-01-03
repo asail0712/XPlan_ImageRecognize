@@ -18,16 +18,40 @@ namespace XPlan.MediaPipe.RemovalBackground
 {    
     public class RemovalBackgroundLogic : LogicComponent
     {
+        RemovalBackgroundGraph graphRunner;
+        RunningMode runningMode;
+        ImageSource imageSource;
+
         public RemovalBackgroundLogic()
         {
-            RegisterNotify<PrepareFinishMsg>((msg) => 
-            {
-                RunningMode runningMode             = msg.runningMode;
-                RemovalBackgroundGraph graphRunner  = (RemovalBackgroundGraph)msg.graphRunner;
-                ImageSource imageSource             = msg.imageSource;
+            graphRunner = null;
+            runningMode = RunningMode.Async;
+            imageSource = null;
 
-                StartCoroutine(Run(graphRunner, runningMode, imageSource));
+            RegisterNotify<GraphRunnerPrepareMsg>((msg) => 
+            {
+                runningMode = msg.runningMode;
+                graphRunner = (RemovalBackgroundGraph)msg.graphRunner;
+
+                StartRun();
             });
+
+            RegisterNotify<CamTexturePrepareMsg>((msg) =>
+            {
+                imageSource = msg.imageSource;
+
+                StartRun();
+            });
+        }
+
+        private void StartRun()
+        {
+            if(graphRunner == null || imageSource == null)
+            {
+                return;
+            }
+
+            StartCoroutine(Run(graphRunner, runningMode, imageSource));
         }
 
         protected IEnumerator Run(RemovalBackgroundGraph graphRunner, RunningMode runningMode, ImageSource imageSource)
