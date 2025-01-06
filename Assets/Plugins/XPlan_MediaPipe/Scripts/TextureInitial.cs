@@ -28,6 +28,11 @@ namespace XPlan.MediaPipe
     {
         public TextureInitial(ImageSource imgSourece)
         {
+            if (imgSourece == null)
+            {
+                return;
+            }
+
             StartCoroutine(Run(imgSourece));
         }
 
