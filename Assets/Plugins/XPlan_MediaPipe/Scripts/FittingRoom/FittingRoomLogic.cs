@@ -1,40 +1,49 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-using Google.Protobuf.Collections;
 using Mediapipe;
 using Mediapipe.Unity;
 using Mediapipe.Unity.Sample;
 using Mediapipe.Unity.Sample.Holistic;
 
 using XPlan.Observe;
-using XPlan.Interface;
 
 using TextureFramePool = Mediapipe.Unity.Experimental.TextureFramePool;
 
-namespace XPlan.MediaPipe.FittingRoom
+namespace XPlan.MediaPipe
 {    
-    public class FittingRoomLogic : LogicComponent, ITickable
+    public class PoseWorldLandmarkMsg : MessageBase
     {
-        private AvatarScaler avatarScaler;
-        private AvatarFitting avatarFitting;
-        private GameObject fittingAvatarGO;
-        private Vector3 keyPoint;
+        public LandmarkList landmarkList;
+        public PoseWorldLandmarkMsg(LandmarkList landmarkList)
+        {
+            this.landmarkList = landmarkList;
+        }
+    }
 
+    public class PoseLandmarkMsg : MessageBase
+    {
+        public NormalizedLandmarkList landmarkList;
+
+        public PoseLandmarkMsg(NormalizedLandmarkList landmarkList)
+        {
+            this.landmarkList = landmarkList;
+        }
+    }
+
+    public class FittingRoomLogic : LogicComponent
+    {
         HolisticTrackingGraph graphRunner;
         RunningMode runningMode;
         ImageSource imageSource;
 
-        public FittingRoomLogic(GameObject fittingAvatarGO)
+        public FittingRoomLogic()
         {
-            this.fittingAvatarGO    = fittingAvatarGO;
-            this.avatarScaler       = fittingAvatarGO.GetComponent<AvatarScaler>();
-            this.avatarFitting      = fittingAvatarGO.GetComponent<AvatarFitting>();
-
             RegisterNotify<GraphRunnerPrepareMsg>((msg) =>
             {
                 runningMode = msg.runningMode;
@@ -117,8 +126,8 @@ namespace XPlan.MediaPipe.FittingRoom
                     yield return new WaitUntil(() => task.IsCompleted);
 
                     var result = task.Result;
-
-                    avatarFitting.Refresh(result.poseWorldLandmarks);
+                    
+                    SendMsg<PoseWorldLandmarkMsg>(result.poseWorldLandmarks);
                 }
             }
         }
@@ -128,43 +137,26 @@ namespace XPlan.MediaPipe.FittingRoom
         {
             var packet  = eventArgs.packet;
             var value   = packet == null ? default : packet.Get(LandmarkList.Parser);
+            
+            if(value == null)
+            {
+                return;
+            }    
 
-            avatarFitting.Refresh(value);
+            SendMsg<PoseWorldLandmarkMsg>(value);
         }
 
         private void OnPoseLandmarksOutput(object stream, OutputStream<NormalizedLandmarkList>.OutputEventArgs eventArgs)
         {
-            var packet = eventArgs.packet;
-            var value = packet == null ? default : packet.Get(NormalizedLandmarkList.Parser);
+            var packet  = eventArgs.packet;
+            var value   = packet == null ? default : packet.Get(NormalizedLandmarkList.Parser);
 
             if (value == null)
             {
                 return;
             }
 
-            NormalizedLandmarkList nlmList = value;
-            RepeatedField<NormalizedLandmark> lmList = nlmList.Landmark;
-
-            NormalizedLandmark leftHip = lmList[23];
-            NormalizedLandmark rightHip = lmList[24];
-
-            keyPoint = new Vector3((leftHip.X + rightHip.X) / 2f, 1 - (leftHip.Y + rightHip.Y) / 2f, (leftHip.Z + rightHip.Z) / 2f);
-
-            avatarScaler.SetLandmark(lmList);
-        }
-
-        public void Tick(float deltaTime)
-        {
-            if (keyPoint == null || fittingAvatarGO == null)
-            {
-                return;
-            }
-
-            // Screen 0,0 在左下角
-            Vector3 hipScreenPos = new Vector3(keyPoint.x * UnityEngine.Screen.width, keyPoint.y * UnityEngine.Screen.height, 10f);
-            Vector3 hipWorldPos = Camera.main.ScreenToWorldPoint(hipScreenPos);
-
-            fittingAvatarGO.transform.position = hipWorldPos;
+            SendMsg<PoseLandmarkMsg>(value);
         }
     }
 }

@@ -14,7 +14,7 @@ using Mediapipe.Unity.Sample;
 
 using TextureFrame = Mediapipe.Unity.Experimental.TextureFrame;
 
-namespace XPlan.MediaPipe.RemovalBackground
+namespace XPlan.MediaPipe
 {
     public readonly struct RemovalBackgroundResult
     {

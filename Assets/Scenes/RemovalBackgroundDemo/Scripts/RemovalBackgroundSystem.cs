@@ -11,9 +11,8 @@ using Mediapipe.Unity.Sample;
 
 using XPlan;
 using XPlan.MediaPipe;
-using XPlan.MediaPipe.RemovalBackground;
 
-namespace XPlan.Demo
+namespace XPlan.MediaPipe.Demo
 {    
     public class RemovalBackgroundSystem : SystemBase
     {

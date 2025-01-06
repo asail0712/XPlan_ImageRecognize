@@ -14,7 +14,7 @@ using Mediapipe.Unity;
 using XPlan.MediaPipe;
 using XPlan.UI;
 
-namespace XPlan.Demo
+namespace XPlan.MediaPipe.Demo
 {
     public class RemovalBackgroundUI : UIBase
     {

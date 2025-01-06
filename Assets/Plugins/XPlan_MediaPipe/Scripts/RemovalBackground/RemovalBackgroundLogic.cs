@@ -14,7 +14,7 @@ using XPlan.UI;
 
 using TextureFramePool = Mediapipe.Unity.Experimental.TextureFramePool;
 
-namespace XPlan.MediaPipe.RemovalBackground
+namespace XPlan.MediaPipe
 {    
     public class RemovalBackgroundLogic : LogicComponent
     {

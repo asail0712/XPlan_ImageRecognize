@@ -11,9 +11,8 @@ using Mediapipe.Unity.Sample.Holistic;
 
 using XPlan;
 using XPlan.MediaPipe;
-using XPlan.MediaPipe.FittingRoom;
 
-namespace XPlan.Demo
+namespace XPlan.MediaPipe.Demo
 {    
     public class FittingRoomSystem : SystemBase
     {
@@ -32,7 +31,8 @@ namespace XPlan.Demo
         {
             RegisterLogic(new GraphRunnerInitial(graphRunner, runningMode, bootstrapPrefab));
             RegisterLogic(new CamTextureInitial());
-            RegisterLogic(new FittingRoomLogic(fittingAvatarGO));
+            RegisterLogic(new FittingRoomLogic());
+            RegisterLogic(new AvatarController(fittingAvatarGO));
         }
     }
 }
