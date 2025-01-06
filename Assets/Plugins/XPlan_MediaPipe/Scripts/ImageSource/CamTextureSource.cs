@@ -9,7 +9,7 @@ using XPlan.Utility;
 
 namespace XPlan.MediaPipe
 {
-    public class WebCamTextureSource : ImageSource
+    public class CamTextureSource : ImageSource
     {
         private WebCamController webCamController;
         private WebCamDevice webCamDevice;
@@ -64,7 +64,7 @@ namespace XPlan.MediaPipe
             }
         }
 
-        public WebCamTextureSource()
+        public CamTextureSource()
         {
             webCamController = WebCamUtility.GenerateCamController();
 

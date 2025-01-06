@@ -19,6 +19,7 @@ namespace XPlan.MediaPipe
         [SerializeField] private GameObject bootstrapPrefab;
         [SerializeField] private HolisticTrackingGraph graphRunner;
         [SerializeField] private RunningMode runningMode;
+        [SerializeField] private ImageSourceType imgSourceType;
 
         protected override void OnInitialGameObject()
         {
@@ -27,8 +28,19 @@ namespace XPlan.MediaPipe
 
         protected override void OnInitialLogic()
         {
+            ImageSource imgSource = null;
+
+            switch (imgSourceType)
+            {
+                case ImageSourceType.WebCamera:
+                    imgSource = new CamTextureSource();
+                    break;
+                case ImageSourceType.Kinect:
+                    break;
+            }
+
             RegisterLogic(new GraphRunnerInitial(graphRunner, runningMode, bootstrapPrefab));
-            RegisterLogic(new CamTextureInitial());
+            RegisterLogic(new TextureInitial(imgSource));
             RegisterLogic(new FittingRoomLogic());
         }
     }

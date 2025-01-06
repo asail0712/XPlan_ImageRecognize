@@ -52,7 +52,7 @@ namespace XPlan.MediaPipe
                 StartRun();
             });
 
-            RegisterNotify<CamTexturePrepareMsg>((msg) =>
+            RegisterNotify<TexturePrepareMsg>((msg) =>
             {
                 imageSource = msg.imageSource;
 

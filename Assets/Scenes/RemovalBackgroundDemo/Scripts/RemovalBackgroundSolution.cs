@@ -16,7 +16,6 @@ using TextureFramePool = Mediapipe.Unity.Experimental.TextureFramePool;
 
 namespace XPlan.MediaPipe.Demo
 {
-
     public class RemovalBackgroundSolution : LegacySolutionRunner<RemovalBackgroundGraph>
     {
         private TextureFramePool _textureFramePool;
@@ -24,7 +23,7 @@ namespace XPlan.MediaPipe.Demo
         protected override IEnumerator Run()
         {
             WaitForResult graphInitRequest  = graphRunner.WaitForInit(runningMode);
-            ImageSource imageSource         = new WebCamTextureSource();
+            ImageSource imageSource         = new CamTextureSource();
 
             yield return imageSource.Play();
 
