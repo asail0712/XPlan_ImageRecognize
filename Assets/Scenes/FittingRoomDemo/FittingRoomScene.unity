@@ -1349,6 +1349,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3400096631920887583, guid: e3108569a8704c14394651e0f671abe5,
+        type: 3}
+      propertyPath: _cpuConfig
+      value: 
+      objectReference: {fileID: 4900000, guid: a44bc158776485a4eb5ce80ba4856af1, type: 3}
+    - target: {fileID: 3400096631920887583, guid: e3108569a8704c14394651e0f671abe5,
+        type: 3}
+      propertyPath: _gpuConfig
+      value: 
+      objectReference: {fileID: 4900000, guid: 6146e51bc0ed14e46b4672d6b20978c2, type: 3}
+    - target: {fileID: 3400096631920887583, guid: e3108569a8704c14394651e0f671abe5,
+        type: 3}
+      propertyPath: _openGlEsConfig
+      value: 
+      objectReference: {fileID: 4900000, guid: 7ca16f54131c5464b8e6593e3817d783, type: 3}
     - target: {fileID: 9071828073174810072, guid: e3108569a8704c14394651e0f671abe5,
         type: 3}
       propertyPath: m_Name
