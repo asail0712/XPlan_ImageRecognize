@@ -45,9 +45,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 326e6292d21184e3384c9de6a8abe56a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cpuConfig: {fileID: 4900000, guid: e12a251c997c2ab4dbc44c6c35f9461e, type: 3}
-  _gpuConfig: {fileID: 4900000, guid: 948c0a01879e73b4d8afe979b4859cea, type: 3}
-  _openGlEsConfig: {fileID: 4900000, guid: 34fb49cc43d0bbb41aae860c3adc3cf8, type: 3}
+  _cpuConfig: {fileID: 4900000, guid: a44bc158776485a4eb5ce80ba4856af1, type: 3}
+  _gpuConfig: {fileID: 4900000, guid: 6146e51bc0ed14e46b4672d6b20978c2, type: 3}
+  _openGlEsConfig: {fileID: 4900000, guid: 7ca16f54131c5464b8e6593e3817d783, type: 3}
   _timeoutMicrosec: 100000
   refineFaceLandmarks: 1
   modelComplexity: 1
