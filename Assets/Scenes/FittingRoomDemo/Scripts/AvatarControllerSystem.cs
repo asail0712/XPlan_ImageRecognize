@@ -14,12 +14,8 @@ using XPlan.MediaPipe;
 
 namespace XPlan.MediaPipe.Demo
 {    
-    public class FittingRoomSystem : SystemBase
+    public class AvatarControllerSystem : SystemBase
     {
-        [SerializeField] private GameObject bootstrapPrefab;
-        [SerializeField] private HolisticTrackingGraph graphRunner;
-        [SerializeField] private RunningMode runningMode;
-
         [SerializeField] private GameObject fittingAvatarGO;
 
         protected override void OnInitialGameObject()
@@ -29,9 +25,6 @@ namespace XPlan.MediaPipe.Demo
 
         protected override void OnInitialLogic()
         {
-            RegisterLogic(new GraphRunnerInitial(graphRunner, runningMode, bootstrapPrefab));
-            RegisterLogic(new CamTextureInitial());
-            RegisterLogic(new FittingRoomLogic());
             RegisterLogic(new AvatarController(fittingAvatarGO));
         }
     }

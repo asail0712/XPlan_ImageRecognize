@@ -143,7 +143,7 @@ namespace XPlan.MediaPipe
                 return;
             }    
 
-            SendMsg<PoseWorldLandmarkMsg>(value);
+            SendGlobalMsg<PoseWorldLandmarkMsg>(value);
         }
 
         private void OnPoseLandmarksOutput(object stream, OutputStream<NormalizedLandmarkList>.OutputEventArgs eventArgs)
@@ -156,7 +156,7 @@ namespace XPlan.MediaPipe
                 return;
             }
 
-            SendMsg<PoseLandmarkMsg>(value);
+            SendGlobalMsg<PoseLandmarkMsg>(value);
         }
     }
 }

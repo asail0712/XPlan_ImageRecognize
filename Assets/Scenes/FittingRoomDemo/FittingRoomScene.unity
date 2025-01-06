@@ -119,6 +119,51 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &7656835
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7656837}
+  - component: {fileID: 7656836}
+  m_Layer: 0
+  m_Name: AvatarController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &7656836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7656835}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60ccd758dca928a4683213358a9edd27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fittingAvatarGO: {fileID: 1629590925}
+--- !u!4 &7656837
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7656835}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 6.822378, y: -1.9362046, z: 11.5769205}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &40539277
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1349,21 +1394,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3400096631920887583, guid: e3108569a8704c14394651e0f671abe5,
-        type: 3}
-      propertyPath: _cpuConfig
-      value: 
-      objectReference: {fileID: 4900000, guid: a44bc158776485a4eb5ce80ba4856af1, type: 3}
-    - target: {fileID: 3400096631920887583, guid: e3108569a8704c14394651e0f671abe5,
-        type: 3}
-      propertyPath: _gpuConfig
-      value: 
-      objectReference: {fileID: 4900000, guid: 6146e51bc0ed14e46b4672d6b20978c2, type: 3}
-    - target: {fileID: 3400096631920887583, guid: e3108569a8704c14394651e0f671abe5,
-        type: 3}
-      propertyPath: _openGlEsConfig
-      value: 
-      objectReference: {fileID: 4900000, guid: 7ca16f54131c5464b8e6593e3817d783, type: 3}
     - target: {fileID: 9071828073174810072, guid: e3108569a8704c14394651e0f671abe5,
         type: 3}
       propertyPath: m_Name
@@ -1381,8 +1411,9 @@ SceneRoots:
   - {fileID: 1264297881}
   - {fileID: 638479258}
   - {fileID: 1223870916}
-  - {fileID: 7400275062621586614}
   - {fileID: 1629590924}
   - {fileID: 1831067447}
   - {fileID: 1821814621}
   - {fileID: 40539277}
+  - {fileID: 7400275062621586614}
+  - {fileID: 7656837}
