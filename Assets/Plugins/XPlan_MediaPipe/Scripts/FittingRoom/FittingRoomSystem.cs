@@ -28,19 +28,8 @@ namespace XPlan.MediaPipe
 
         protected override void OnInitialLogic()
         {
-            ImageSource imgSource = null;
-
-            switch (imgSourceType)
-            {
-                case ImageSourceType.WebCamera:
-                    imgSource = new CamTextureSource();
-                    break;
-                case ImageSourceType.Kinect:
-                    break;
-            }
-
             RegisterLogic(new GraphRunnerInitial(graphRunner, runningMode, bootstrapPrefab));
-            RegisterLogic(new TextureInitial(imgSource));
+            RegisterLogic(new TextureInitial(imgSourceType));
             RegisterLogic(new FittingRoomLogic());
         }
     }

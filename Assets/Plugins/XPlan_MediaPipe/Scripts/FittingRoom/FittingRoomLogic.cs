@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering;
 
+using Google.Protobuf.Collections;
 using Mediapipe;
 using Mediapipe.Unity;
 using Mediapipe.Unity.Sample;
@@ -23,6 +24,16 @@ namespace XPlan.MediaPipe
         public PoseWorldLandmarkMsg(LandmarkList landmarkList)
         {
             this.landmarkList = landmarkList;
+        }
+    }
+
+    public class HipPositionMsg : MessageBase
+    {
+        public Vector3 hipPos;
+
+        public HipPositionMsg(Vector3 pos)
+        {
+            this.hipPos = pos;
         }
     }
 
@@ -157,6 +168,14 @@ namespace XPlan.MediaPipe
             }
 
             SendGlobalMsg<PoseLandmarkMsg>(value);
+
+            NormalizedLandmarkList nlmList              = value;
+            RepeatedField<NormalizedLandmark> lmList    = nlmList.Landmark;
+
+            NormalizedLandmark leftHip                  = lmList[23];
+            NormalizedLandmark rightHip                 = lmList[24];
+            
+            SendGlobalMsg<HipPositionMsg>(new Vector3((leftHip.X + rightHip.X) / 2f, 1 - (leftHip.Y + rightHip.Y) / 2f, (leftHip.Z + rightHip.Z) / 2f));
         }
     }
 }

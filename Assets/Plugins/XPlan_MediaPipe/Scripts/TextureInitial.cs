@@ -26,14 +26,21 @@ namespace XPlan.MediaPipe
 
     public class TextureInitial : LogicComponent
     {
-        public TextureInitial(ImageSource imgSourece)
+        public TextureInitial(ImageSourceType type)
         {
-            if (imgSourece == null)
+            ImageSource imgSource = null;
+
+            switch (type)
             {
-                return;
+                case ImageSourceType.WebCamera:
+                    imgSource = new CamTextureSource();
+                    break;
+                case ImageSourceType.Kinect:
+                    imgSource = new KinectTextureSource();
+                    break;
             }
 
-            StartCoroutine(Run(imgSourece));
+            StartCoroutine(Run(imgSource));
         }
 
         protected IEnumerator Run(ImageSource imageSource)
