@@ -26,6 +26,7 @@ namespace XPlan.MediaPipe.Demo
         protected override void OnInitialLogic()
         {
             RegisterLogic(new AvatarController(fittingAvatarGO));
+            RegisterLogic(new ImageUIInitial());
         }
     }
 }
