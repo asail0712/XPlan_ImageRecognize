@@ -47,12 +47,12 @@ namespace XPlan.MediaPipe.Demo
              * UI Listener
              * ****************************/
             ListenCall<ImageSource>(UICommand.InitScreen, InitUI);
-            ListenCall<ImageFrame>(UICommand.UpdateMask, UpdateMask);
+            ListenCall<float[]>(UICommand.UpdateMask, UpdateMask);
         }
 
         private void LateUpdate()
         {
-            if (maskBuffer != null)
+            if (maskBuffer != null && maskArray != null)
             {
                 maskBuffer.SetData(maskArray);
             }
@@ -77,15 +77,9 @@ namespace XPlan.MediaPipe.Demo
         }
 #endif
 
-        public void UpdateMask(ImageFrame imgFrame)
+        public void UpdateMask(float[] maskArray)
         {
-            if(imgFrame == null)
-            {
-                return;
-            }
-
-            // 將image frame的資料轉移到maskArray
-            var _ = imgFrame.TryReadChannelNormalized(0, maskArray);
+            this.maskArray = maskArray;
         }
 
         private void InitUI(ImageSource imageSource)
@@ -126,8 +120,7 @@ namespace XPlan.MediaPipe.Demo
 
             int stride  = Marshal.SizeOf(typeof(float));
             maskBuffer  = new GraphicsBuffer(GraphicsBuffer.Target.Structured, (int)width * (int)height, stride);
-            maskArray   = new float[(int)width * (int)height];
-
+            
             maskMaterial.SetBuffer("_MaskBuffer", maskBuffer);
         }
 

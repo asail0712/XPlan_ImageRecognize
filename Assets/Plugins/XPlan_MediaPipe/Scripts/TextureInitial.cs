@@ -13,7 +13,13 @@ using XPlan.UI;
 using TextureFramePool = Mediapipe.Unity.Experimental.TextureFramePool;
 
 namespace XPlan.MediaPipe
-{    
+{
+    public enum ImageSourceType
+    {
+        WebCamera,
+        Kinect,
+    }
+
     public class TexturePrepareMsg : MessageBase
     {
         public ImageSource imageSource;
@@ -54,11 +60,8 @@ namespace XPlan.MediaPipe
                 yield break;
             }
 
-            // 初始化UI
-            UISystem.DirectCall<ImageSource>(UICommand.InitScreen, imageSource);
-
             // 將初始化的結果送出
-            SendMsg<TexturePrepareMsg>(imageSource);
+            SendGlobalMsg<TexturePrepareMsg>(imageSource);
         }
     }
 }

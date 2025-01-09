@@ -16,11 +16,23 @@ using TextureFramePool = Mediapipe.Unity.Experimental.TextureFramePool;
 
 namespace XPlan.MediaPipe
 {    
+    public class RemovalBGMaskMsg : MessageBase
+    {
+        public float[] maskArray;
+
+        public RemovalBGMaskMsg(float[] maskArray)
+        {
+            this.maskArray = maskArray;
+        }
+    }
+
     public class RemovalBackgroundLogic : LogicComponent
     {
-        RemovalBackgroundGraph graphRunner;
-        RunningMode runningMode;
-        ImageSource imageSource;
+        private RemovalBackgroundGraph graphRunner;
+        private RunningMode runningMode;
+        private ImageSource imageSource;
+
+        private float[] maskArray;
 
         public RemovalBackgroundLogic()
         {
@@ -39,6 +51,7 @@ namespace XPlan.MediaPipe
             RegisterNotify<TexturePrepareMsg>((msg) =>
             {
                 imageSource = msg.imageSource;
+                maskArray   = new float[imageSource.textureWidth * imageSource.textureHeight];
 
                 StartRun();
             });
@@ -108,7 +121,7 @@ namespace XPlan.MediaPipe
                     yield return new WaitUntil(() => task.IsCompleted);
 
                     RemovalBackgroundResult result = task.Result;
-                    UISystem.DirectCall<ImageFrame>(UICommand.UpdateMask, result.segmentationMask);
+                    ProcessImageFrame(result.segmentationMask);
                     result.segmentationMask?.Dispose();
                 }
             }
@@ -116,11 +129,26 @@ namespace XPlan.MediaPipe
         private void OnSegmentationMaskOutput(object stream, OutputStream<ImageFrame>.OutputEventArgs eventArgs)
         {
             Packet<ImageFrame> packet   = eventArgs.packet;
-            ImageFrame value            = packet == null ? default : packet.Get();
-            
-            UISystem.DirectCall<ImageFrame>(UICommand.UpdateMask, value);
+            ImageFrame imgFrame         = packet == null ? default : packet.Get();
 
-            value?.Dispose();
+            ProcessImageFrame(imgFrame);
+
+            imgFrame?.Dispose();
+        }
+
+        private void ProcessImageFrame(ImageFrame imgFrame)
+        {
+            if (imgFrame == null)
+            {
+                return;
+            }
+            // 將image frame的資料轉移到maskArray
+            bool bResult = imgFrame.TryReadChannelNormalized(0, maskArray);
+
+            if (bResult)
+            {
+                SendGlobalMsg<RemovalBGMaskMsg>(maskArray);
+            }
         }
     }
 }

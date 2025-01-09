@@ -38,8 +38,9 @@ namespace XPlan.MediaPipe.Demo
             _textureFramePool = new TextureFramePool(imageSource.textureWidth, imageSource.textureHeight, TextureFormat.RGBA32, 10);
 
             // NOTE: The screen will be resized later, keeping the aspect ratio.
-            UISystem.DirectCall<ImageSource>(UICommand.InitScreen, imageSource);
-            
+            TexturePrepareMsg msg = new TexturePrepareMsg(imageSource);
+            msg.Send();
+
             yield return graphInitRequest;
             if (graphInitRequest.isError)
             {
