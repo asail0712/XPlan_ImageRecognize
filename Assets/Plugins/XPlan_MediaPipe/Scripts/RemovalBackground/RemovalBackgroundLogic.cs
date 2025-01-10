@@ -16,11 +16,27 @@ using TextureFramePool = Mediapipe.Unity.Experimental.TextureFramePool;
 
 namespace XPlan.MediaPipe
 {    
-    public class RemovalBGMaskMsg : MessageBase
+    public enum MaskType
+    {
+        FloatArray,
+        ColorArray,
+    }
+
+    public class ColorMaskMsg : MessageBase
+    {
+        public Color32[] maskColorArray;
+
+        public ColorMaskMsg(Color32[] maskColorArray)
+        {
+            this.maskColorArray = maskColorArray;
+        }
+    }
+
+    public class FloatMaskMsg : MessageBase
     {
         public float[] maskArray;
 
-        public RemovalBGMaskMsg(float[] maskArray)
+        public FloatMaskMsg(float[] maskArray)
         {
             this.maskArray = maskArray;
         }
@@ -33,12 +49,15 @@ namespace XPlan.MediaPipe
         private ImageSource imageSource;
 
         private float[] maskArray;
+        private Color32[] maskColorArray;
+        private MaskType maskType;
 
-        public RemovalBackgroundLogic()
+        public RemovalBackgroundLogic(MaskType maskType)
         {
-            graphRunner = null;
-            runningMode = RunningMode.Async;
-            imageSource = null;
+            this.graphRunner    = null;
+            this.runningMode    = RunningMode.Async;
+            this.imageSource    = null;
+            this.maskType       = maskType;
 
             RegisterNotify<GraphRunnerPrepareMsg>((msg) => 
             {
@@ -50,8 +69,9 @@ namespace XPlan.MediaPipe
 
             RegisterNotify<TexturePrepareMsg>((msg) =>
             {
-                imageSource = msg.imageSource;
-                maskArray   = new float[imageSource.textureWidth * imageSource.textureHeight];
+                imageSource     = msg.imageSource;
+                maskArray       = new float[imageSource.textureWidth * imageSource.textureHeight];
+                maskColorArray  = new Color32[imageSource.textureWidth * imageSource.textureHeight];
 
                 StartRun();
             });
@@ -117,10 +137,11 @@ namespace XPlan.MediaPipe
 
                 if (runningMode.IsSynchronous())
                 {
-                    Task<RemovalBackgroundResult> task = graphRunner.WaitNextAsync();
+                    Task<RemovalBackgroundResult> task  = graphRunner.WaitNextAsync();
+
                     yield return new WaitUntil(() => task.IsCompleted);
 
-                    RemovalBackgroundResult result = task.Result;
+                    RemovalBackgroundResult result      = task.Result;
                     ProcessImageFrame(result.segmentationMask);
                     result.segmentationMask?.Dispose();
                 }
@@ -142,12 +163,33 @@ namespace XPlan.MediaPipe
             {
                 return;
             }
-            // 將image frame的資料轉移到maskArray
-            bool bResult = imgFrame.TryReadChannelNormalized(0, maskArray);
 
-            if (bResult)
+
+            bool bResult = false;
+
+            switch(maskType)
             {
-                SendGlobalMsg<RemovalBGMaskMsg>(maskArray);
+                case MaskType.FloatArray:
+                    bResult = imgFrame.TryReadChannelNormalized(0, maskArray);
+                    break;
+                case MaskType.ColorArray:
+                    bResult = imgFrame.TryReadPixelData(maskColorArray);
+                    break;
+            }
+
+            if(!bResult)
+            {
+                return;
+            }
+
+            switch (maskType)
+            {
+                case MaskType.FloatArray:
+                    SendGlobalMsg<FloatMaskMsg>(maskArray);
+                    break;
+                case MaskType.ColorArray:
+                    SendGlobalMsg<ColorMaskMsg>(maskColorArray);
+                    break;
             }
         }
     }

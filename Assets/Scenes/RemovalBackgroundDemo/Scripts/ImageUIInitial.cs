@@ -22,7 +22,7 @@ namespace XPlan.MediaPipe.Demo
                 DirectCallUI<ImageSource>(UICommand.InitScreen, msg.imageSource);
             });
 
-            RegisterNotify<RemovalBGMaskMsg>((msg) =>
+            RegisterNotify<FloatMaskMsg>((msg) =>
             {
                 DirectCallUI<float[]>(UICommand.UpdateMask, msg.maskArray);
             });            

@@ -20,6 +20,7 @@ namespace XPlan.MediaPipe
         [SerializeField] private RemovalBackgroundGraph graphRunner;
         [SerializeField] private RunningMode runningMode;
         [SerializeField] private ImageSourceType imgSourceType;
+        [SerializeField] private MaskType maskType;
 
         protected override void OnInitialGameObject()
         {
@@ -30,7 +31,7 @@ namespace XPlan.MediaPipe
         {
             RegisterLogic(new GraphRunnerInitial(graphRunner, runningMode, bootstrapPrefab));
             RegisterLogic(new TextureInitial(imgSourceType));
-            RegisterLogic(new RemovalBackgroundLogic());
+            RegisterLogic(new RemovalBackgroundLogic(maskType));
         }
     }
 }
