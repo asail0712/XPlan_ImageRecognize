@@ -2,7 +2,7 @@ using UnityEngine;
 
 using XPlan;
 
-namespace XPlan.MediaPipe.Demo
+namespace XPlan.ImageRecognize.Demo
 { 
     public class ImageController : SystemBase
     {

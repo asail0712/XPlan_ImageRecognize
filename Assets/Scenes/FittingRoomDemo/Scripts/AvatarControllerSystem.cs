@@ -10,9 +10,9 @@ using Mediapipe.Unity;
 using Mediapipe.Unity.Sample.Holistic;
 
 using XPlan;
-using XPlan.MediaPipe;
+using XPlan.ImageRecognize;
 
-namespace XPlan.MediaPipe.Demo
+namespace XPlan.ImageRecognize.Demo
 {    
     public class AvatarControllerSystem : SystemBase
     {

@@ -5,9 +5,9 @@ using Mediapipe;
 
 using XPlan;
 using XPlan.Interface;
-using XPlan.MediaPipe;
+using XPlan.ImageRecognize;
 
-namespace XPlan.MediaPipe.Demo
+namespace XPlan.ImageRecognize.Demo
 {
     public class AvatarController : LogicComponent, ITickable
     {

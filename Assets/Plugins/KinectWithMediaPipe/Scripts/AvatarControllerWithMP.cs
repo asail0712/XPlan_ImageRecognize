@@ -8,7 +8,7 @@ using com.rfilkov.kinect;
 using com.rfilkov.components;
 
 using XPlan.Observe;
-using XPlan.MediaPipe;
+using XPlan.ImageRecognize;
 
 namespace XPlan.KinectWithMediaPipe
 {

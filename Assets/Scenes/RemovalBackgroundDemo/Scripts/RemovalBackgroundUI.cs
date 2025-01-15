@@ -11,10 +11,10 @@ using Color = UnityEngine.Color;
 using Mediapipe;
 using Mediapipe.Unity;
 
-using XPlan.MediaPipe;
+using XPlan.ImageRecognize;
 using XPlan.UI;
 
-namespace XPlan.MediaPipe.Demo
+namespace XPlan.ImageRecognize.Demo
 {
     public class RemovalBackgroundUI : UIBase
     {

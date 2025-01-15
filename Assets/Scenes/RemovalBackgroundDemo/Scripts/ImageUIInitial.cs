@@ -4,7 +4,7 @@ using Mediapipe.Unity;
 
 using XPlan;
 
-namespace XPlan.MediaPipe.Demo
+namespace XPlan.ImageRecognize.Demo
 {
     public static class UICommand
     {

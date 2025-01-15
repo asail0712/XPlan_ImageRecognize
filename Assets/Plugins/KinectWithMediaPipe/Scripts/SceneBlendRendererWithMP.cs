@@ -4,7 +4,7 @@ using UnityEngine;
 using com.rfilkov.kinect;
 using com.rfilkov.components;
 
-using XPlan.MediaPipe;
+using XPlan.ImageRecognize;
 using XPlan.Observe;
 using XPlan.Recycle;
 using System;

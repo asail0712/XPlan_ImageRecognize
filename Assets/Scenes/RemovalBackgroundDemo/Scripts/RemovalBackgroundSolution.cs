@@ -10,11 +10,11 @@ using Mediapipe.Unity;
 using Mediapipe.Unity.Sample;
 
 using XPlan.UI;
-using XPlan.MediaPipe;
+using XPlan.ImageRecognize;
 
 using TextureFramePool = Mediapipe.Unity.Experimental.TextureFramePool;
 
-namespace XPlan.MediaPipe.Demo
+namespace XPlan.ImageRecognize.Demo
 {
     public class RemovalBackgroundSolution : LegacySolutionRunner<RemovalBackgroundGraph>
     {
