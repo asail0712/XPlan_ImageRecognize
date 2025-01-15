@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 //using Windows.Kinect;
 
 using System;
@@ -10,7 +10,7 @@ using com.rfilkov.components;
 using XPlan.Observe;
 using XPlan.MediaPipe;
 
-namespace Granden.kingstore3.Demo
+namespace XPlan.KinectWithMediaPipe
 {
     /// <summary>
     /// Avatar controller is the component that transfers the captured user motion to a humanoid model (avatar).

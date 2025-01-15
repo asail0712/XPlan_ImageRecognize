@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,7 +9,7 @@ using System.IO;
 using com.rfilkov.kinect;
 using com.rfilkov.components;
 
-namespace Granden.kingstore3.Demo
+namespace XPlan.KinectWithMediaPipe
 {
     /// <summary>
     /// ModelSelector controls the virtual model selection, as well as instantiates and sets up the selected model to overlay the user.

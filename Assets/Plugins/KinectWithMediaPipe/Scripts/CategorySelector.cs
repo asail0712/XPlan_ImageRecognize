@@ -1,10 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using com.rfilkov.kinect;
 
-using ModelSelector = Granden.kingstore3.Demo.ModelSelector;
+using ModelSelector = XPlan.KinectWithMediaPipe.ModelSelector;
 
-namespace Granden.kingstore3.Demo
+namespace XPlan.KinectWithMediaPipe
 {
     public class CategorySelector : MonoBehaviour, GestureListenerInterface
     {

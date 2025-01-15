@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using com.rfilkov.kinect;
@@ -9,7 +9,7 @@ using XPlan.Observe;
 using XPlan.Recycle;
 using System;
 
-namespace Granden.Kingstore3.Demo
+namespace XPlan.KinectWithMediaPipe
 {
     public class TextureData : IPoolable
     {
