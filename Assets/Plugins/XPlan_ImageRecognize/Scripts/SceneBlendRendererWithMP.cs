@@ -4,12 +4,11 @@ using UnityEngine;
 using com.rfilkov.kinect;
 using com.rfilkov.components;
 
-using XPlan.ImageRecognize;
 using XPlan.Observe;
 using XPlan.Recycle;
 using System;
 
-namespace XPlan.KinectWithMediaPipe
+namespace XPlan.ImageRecognize
 {
     public class TextureData : IPoolable
     {

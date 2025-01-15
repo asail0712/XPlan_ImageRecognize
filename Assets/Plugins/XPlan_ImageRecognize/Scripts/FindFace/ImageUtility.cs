@@ -64,6 +64,6 @@ namespace XPlan.ImageRecognize
 
             return bFind;
         }
-#endif //OPENCV_PLUS
     }
+#endif //OPENCV_PLUS
 }

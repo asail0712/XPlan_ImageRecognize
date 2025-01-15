@@ -8,9 +8,8 @@ using com.rfilkov.kinect;
 using com.rfilkov.components;
 
 using XPlan.Observe;
-using XPlan.ImageRecognize;
 
-namespace XPlan.KinectWithMediaPipe
+namespace XPlan.ImageRecognize
 {
     /// <summary>
     /// Avatar controller is the component that transfers the captured user motion to a humanoid model (avatar).

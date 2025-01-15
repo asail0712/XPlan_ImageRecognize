@@ -2,9 +2,9 @@ using UnityEngine;
 using System.Collections;
 using com.rfilkov.kinect;
 
-using ModelSelector = XPlan.KinectWithMediaPipe.ModelSelector;
+using ModelSelector = XPlan.ImageRecognize.ModelSelector;
 
-namespace XPlan.KinectWithMediaPipe
+namespace XPlan.ImageRecognize
 {
     public class CategorySelector : MonoBehaviour, GestureListenerInterface
     {

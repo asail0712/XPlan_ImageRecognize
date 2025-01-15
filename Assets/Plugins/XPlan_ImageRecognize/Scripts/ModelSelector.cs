@@ -9,7 +9,7 @@ using System.IO;
 using com.rfilkov.kinect;
 using com.rfilkov.components;
 
-namespace XPlan.KinectWithMediaPipe
+namespace XPlan.ImageRecognize
 {
     /// <summary>
     /// ModelSelector controls the virtual model selection, as well as instantiates and sets up the selected model to overlay the user.
@@ -316,7 +316,7 @@ namespace XPlan.KinectWithMediaPipe
                     // update scale factors
                     curScaleFactor = bodyScaleFactor + bodyWidthFactor + armScaleFactor + legScaleFactor;
 
-                    AvatarScaler scaler = selModel.GetComponent<AvatarScaler>();
+                    com.rfilkov.components.AvatarScaler scaler = selModel.GetComponent<com.rfilkov.components.AvatarScaler>();
                     if (scaler != null)
                     {
                         scaler.continuousScaling = continuousScaling;
@@ -437,11 +437,11 @@ namespace XPlan.KinectWithMediaPipe
             ac.Update();
 
             KinectManager km = KinectManager.Instance;
-            AvatarScaler scaler = selModel.GetComponent<AvatarScaler>();
+            com.rfilkov.components.AvatarScaler scaler = selModel.GetComponent<com.rfilkov.components.AvatarScaler>();
 
             if (scaler == null)
             {
-                scaler = selModel.AddComponent<AvatarScaler>();
+                scaler = selModel.AddComponent<com.rfilkov.components.AvatarScaler>();
                 scaler.playerIndex = playerIndex;
                 scaler.mirroredAvatar = true;
                 scaler.minUserDistance = km.minUserDistance;
