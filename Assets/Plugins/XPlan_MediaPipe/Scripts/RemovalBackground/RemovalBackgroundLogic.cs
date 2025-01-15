@@ -25,6 +25,8 @@ namespace XPlan.MediaPipe
     public class ColorMaskMsg : MessageBase
     {
         public Color32[] maskColorArray;
+        public int width;
+        public int height;
 
         public ColorMaskMsg(Color32[] maskColorArray)
         {
