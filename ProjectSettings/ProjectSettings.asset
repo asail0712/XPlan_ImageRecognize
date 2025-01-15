@@ -804,7 +804,7 @@ PlayerSettings:
   webGLCloseOnQuit: 0
   webWasm2023: 0
   scriptingDefineSymbols:
-    Standalone: MEDIA_PIPE
+    Standalone: MEDIA_PIPE;KINECT
   additionalCompilerArguments: {}
   platformArchitecture:
     iPhone: 1

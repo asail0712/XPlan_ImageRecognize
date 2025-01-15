@@ -28,9 +28,11 @@ namespace XPlan.MediaPipe
         public int width;
         public int height;
 
-        public ColorMaskMsg(Color32[] maskColorArray)
+        public ColorMaskMsg(Color32[] maskColorArray, int width, int height)
         {
             this.maskColorArray = maskColorArray;
+            this.width          = width;
+            this.height         = height;
         }
     }
 
@@ -190,7 +192,7 @@ namespace XPlan.MediaPipe
                     SendGlobalMsg<FloatMaskMsg>(maskArray);
                     break;
                 case MaskType.ColorArray:
-                    SendGlobalMsg<ColorMaskMsg>(maskColorArray);
+                    SendGlobalMsg<ColorMaskMsg>(maskColorArray, imgFrame.Width(), imgFrame.Height());
                     break;
             }
         }
