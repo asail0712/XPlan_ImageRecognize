@@ -302,7 +302,8 @@ namespace XPlan.ImageRecognize
                 //height = (posShoulderCenter.y - posHipCenter.y) * scaleFactor;
 
 
-                Debug.Log((posShoulderCenter - posHipCenter).magnitude);
+                //Debug.Log($"Body Height: {(posShoulderCenter - posHipCenter).magnitude}");
+                //Debug.Log($"Shoulder Width: {(posShoulderRight - posShoulderLeft).magnitude}");
 
                 height = (posShoulderCenter - posHipCenter).magnitude * scaleFactor;
                 width = (posShoulderRight - posShoulderLeft).magnitude * widthFactor;

@@ -22,7 +22,7 @@ namespace XPlan.ImageRecognize
         }
         public void ReleasePoolable() 
         {
-            GameObject.DestroyImmediate(image);
+            GameObject.Destroy(image);
 
             image = null;
         }
@@ -198,7 +198,7 @@ namespace XPlan.ImageRecognize
 
         void Update()
         {
-            if (sensorData.colorImageTexture != null)
+            if (sensorData != null && sensorData.colorImageTexture != null)
             {
                 if (colorTex == null)
                 {
@@ -253,9 +253,9 @@ namespace XPlan.ImageRecognize
 
                 RecyclePool<TextureData>.RecycleList(recycleList);
 
-                Debug.Log($" Color Texture Num : {colorTexQueue.Count}");
-                Debug.Log($" Pool Num : {RecyclePool<TextureData>.GetPoolNum()}");
-                Debug.Log($" Total Num : {RecyclePool<TextureData>.GetTotalNum()}");
+                //Debug.Log($" Color Texture Num : {colorTexQueue.Count}");
+                //Debug.Log($" Pool Num : {RecyclePool<TextureData>.GetPoolNum()}");
+                //Debug.Log($" Total Num : {RecyclePool<TextureData>.GetTotalNum()}");
             }
 
             // 設定 alphaTex2D

@@ -56,11 +56,15 @@ namespace XPlan.ImageRecognize
         private Color32[] maskColorArray;
         private MaskType maskType;
 
-        public RemovalBackgroundLogic(MaskType maskType)
+        private float tickTime = 0f;
+
+        public RemovalBackgroundLogic(float tickTime, MaskType maskType)
         {
             this.graphRunner    = null;
             this.runningMode    = RunningMode.Async;
             this.imageSource    = null;
+
+            this.tickTime       = tickTime;
             this.maskType       = maskType;
 
             RegisterNotify<GraphRunnerPrepareMsg>((msg) => 
@@ -133,8 +137,14 @@ namespace XPlan.ImageRecognize
                     if (req.hasError)
                     {
                         Debug.LogError($"Failed to read texture from the image source, exiting...");
-                        break;
+                        //break;
+                        continue;
                     }
+                }
+
+                if (tickTime > 0f)
+                {
+                    yield return new WaitForSeconds(tickTime);
                 }
 
                 graphRunner.AddTextureFrameToInputStream(textureFrame, glContext);

@@ -35,23 +35,7 @@ namespace XPlan.ImageRecognize
             Heavy   = 2,
         }
 
-        //private float _minDetectionConfidence = 0.5f;
-        //public float minDetectionConfidence
-        //{
-        //    get => _minDetectionConfidence;
-        //    set => _minDetectionConfidence = Mathf.Clamp01(value);
-        //}
-
-        //private float _minTrackingConfidence = 0.5f;
-        //public float minTrackingConfidence
-        //{
-        //    get => _minTrackingConfidence;
-        //    set => _minTrackingConfidence = Mathf.Clamp01(value);
-        //}
-
-        public bool refineFaceLandmarks         = false;
         public ModelComplexity modelComplexity  = ModelComplexity.Lite;
-        public bool smoothLandmarks             = true;
         public bool enableSegmentation          = true;
         public bool smoothSegmentation          = true;
 
@@ -107,7 +91,7 @@ namespace XPlan.ImageRecognize
             return new List<WaitForResult> 
             {
                 WaitForAsset("face_detection_short_range.bytes"),
-                WaitForAsset(refineFaceLandmarks ? "face_landmark_with_attention.bytes" : "face_landmark.bytes"),
+                WaitForAsset("face_landmark.bytes"),
                 WaitForAsset("hand_landmark_full.bytes"),
                 WaitForAsset("hand_recrop.bytes"),
                 WaitForAsset("handedness.txt"),
@@ -193,9 +177,9 @@ namespace XPlan.ImageRecognize
 
             Debug.Log($"outtput_rotation = {outputRotation}, output_horizontally_flipped = {outputHorizontallyFlipped}, output_vertically_flipped = {outputVerticallyFlipped}");
 
-            sidePacket.Emplace("refine_face_landmarks", Packet.CreateBool(refineFaceLandmarks));
+            sidePacket.Emplace("refine_face_landmarks", Packet.CreateBool(false));
             sidePacket.Emplace("model_complexity", Packet.CreateInt((int)modelComplexity));
-            sidePacket.Emplace("smooth_landmarks", Packet.CreateBool(smoothLandmarks));
+            sidePacket.Emplace("smooth_landmarks", Packet.CreateBool(false));
             sidePacket.Emplace("enable_segmentation", Packet.CreateBool(enableSegmentation));
             sidePacket.Emplace("smooth_segmentation", Packet.CreateBool(smoothSegmentation));
 

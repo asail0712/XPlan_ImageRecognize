@@ -19,6 +19,8 @@ namespace XPlan.ImageRecognize
         [SerializeField] private RemovalBackgroundGraph graphRunner;
         [SerializeField] private RunningMode runningMode;
         [SerializeField] private ImageSourceType imgSourceType;
+
+        [SerializeField] private float tickTime = 0f;
         [SerializeField] private MaskType maskType;
 
         protected override void OnInitialGameObject()
@@ -30,7 +32,7 @@ namespace XPlan.ImageRecognize
         {
             RegisterLogic(new GraphRunnerInitial(graphRunner, runningMode, bootstrapPrefab));
             RegisterLogic(new TextureInitial(imgSourceType));
-            RegisterLogic(new RemovalBackgroundLogic(maskType));
+            RegisterLogic(new RemovalBackgroundLogic(tickTime, maskType));
         }
     }
 }
