@@ -48,7 +48,7 @@ namespace XPlan.Recycle
             {
                 if (poolableQueue.Count == 0)
                 {
-                    LogSystem.Record($"Pool {type} 型別空了 所以生成一個新的 !!", LogType.Warning);
+                    LogSystem.Record($"Pool {type} 型別空了 所以生成一個新的 !!");
 
                     poolable = new T();
                     poolable.InitialPoolable();
@@ -81,6 +81,12 @@ namespace XPlan.Recycle
         static public void Recycle(T poolable)
 		{
             poolable.OnRecycle();
+
+            if(poolableQueue.Contains(poolable))
+            {
+                LogSystem.Record($"{poolable} 已經再Pool裡面了 !!", LogType.Warning);
+                return;
+            }
 
             poolableQueue.Enqueue(poolable);
         }
@@ -130,7 +136,7 @@ namespace XPlan.Recycle
             {
                 GameObject go       = GameObject.Instantiate(prefab);
                 T comp              = go.GetComponent<T>();
-                go.transform.parent = poolRoot.transform;
+                go.transform.parent = poolRoot == null? null : poolRoot.transform;
 
                 go.SetActive(false);                
                 poolableQueue.Enqueue(comp);
@@ -162,6 +168,11 @@ namespace XPlan.Recycle
                     PoolableComponent poolableComp = poolable as PoolableComponent;
 
                     poolableComp.ReleasePoolable();                    
+                }
+                else if(poolable is IPoolable)
+                {
+                    IPoolable releaseObj = poolable as IPoolable;
+                    releaseObj.ReleasePoolable();
                 }
             }
 
