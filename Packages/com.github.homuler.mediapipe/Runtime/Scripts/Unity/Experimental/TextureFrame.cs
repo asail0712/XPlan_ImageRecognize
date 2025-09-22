@@ -93,6 +93,7 @@ namespace Mediapipe.Unity.Experimental
       }
       _glSyncToken?.Dispose();
       _ = _InstanceTable.Remove(_instanceId);
+      UnityEngine.Object.Destroy(_texture);
     }
 
     public void CopyTexture(Texture dst) => Graphics.CopyTexture(_texture, dst);
@@ -108,13 +109,35 @@ namespace Mediapipe.Unity.Experimental
     /// </summary>
     /// <remarks>
     ///   After calling it, pixel data can't be read on CPU safely.
-    ///   If you need to read pixel data on CPU, use <see cref="ReadTextureAsync" /> instead.
+    ///   If you need to read pixel data on CPU, use <see cref="ReadTextureAsync" /> or <see cref="ReadTextureOnCPU"/>  instead.
     /// </remarks>
+    /// <param name="flipHorizontally">If <see langword="true"/>, it will be copied horizontally flipped.</param>
+    /// <param name="flipVertically">If <see langword="true"/>, it will be copied vertically flipped.</param>
     public void ReadTextureOnGPU(Texture src, bool flipHorizontally = false, bool flipVertically = false)
     {
       ReadTextureInternal(src, flipHorizontally, flipVertically);
 
       Graphics.CopyTexture(_tmpRenderTexture, _texture);
+      RenderTexture.ReleaseTemporary(_tmpRenderTexture);
+    }
+
+    /// <summary>
+    ///   Copy texture data from <paramref name="src" />.
+    /// </summary>
+    /// <param name="flipHorizontally">If <see langword="true"/>, it will be copied horizontally flipped.</param>
+    /// <param name="flipVertically">If <see langword="true"/>, it will be copied vertically flipped.</param>
+    public void ReadTextureOnCPU(Texture src, bool flipHorizontally = false, bool flipVertically = false)
+    {
+      ReadTextureInternal(src, flipHorizontally, flipVertically);
+
+      var currentRenderTexture = RenderTexture.active;
+      RenderTexture.active = _tmpRenderTexture;
+      var rect = new UnityEngine.Rect(0, 0, Mathf.Min(_tmpRenderTexture.width, _texture.width), Mathf.Min(_tmpRenderTexture.height, _texture.height));
+      _texture.ReadPixels(rect, 0, 0);
+      _texture.Apply();
+      RenderTexture.active = currentRenderTexture;
+
+      _ = RevokeNativeTexturePtr();
       RenderTexture.ReleaseTemporary(_tmpRenderTexture);
     }
 
@@ -215,7 +238,10 @@ namespace Mediapipe.Unity.Experimental
 
     public Image BuildCPUImage() => new Image(imageFormat, _texture);
 
-    public Image BuildGpuImage(GlContext glContext)
+    [Obsolete("Use BuildGPUImage")]
+    public Image BuildGpuImage(GlContext glContext) => BuildGPUImage(glContext);
+
+    public Image BuildGPUImage(GlContext glContext)
     {
 #if UNITY_EDITOR_LINUX || UNITY_STANDALONE_LINUX || UNITY_ANDROID
       return new Image(Gl.GL_TEXTURE_2D, GetTextureName(), width, height, gpuBufferformat, OnReleaseTextureFrame, glContext);

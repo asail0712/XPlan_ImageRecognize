@@ -15,6 +15,14 @@ namespace Mediapipe.Unity.Sample.MediaPipeVideo
     private Texture2D _outputTexture;
     private Experimental.TextureFramePool _textureFramePool;
 
+    public override void Stop()
+    {
+      base.Stop();
+      _textureFramePool?.Dispose();
+      _textureFramePool = null;
+      Destroy(_outputTexture);
+    }
+
     protected override IEnumerator Run()
     {
       var graphInitRequest = graphRunner.WaitForInit(runningMode);
@@ -71,8 +79,7 @@ namespace Mediapipe.Unity.Sample.MediaPipeVideo
 
       graphRunner.StartRun(imageSource);
 
-      AsyncGPUReadbackRequest req = default;
-      var waitUntilReqDone = new WaitUntil(() => req.done);
+      var waitForEndOfFrame = new WaitForEndOfFrame();
 
       while (true)
       {
@@ -83,26 +90,19 @@ namespace Mediapipe.Unity.Sample.MediaPipeVideo
 
         if (!_textureFramePool.TryGetTextureFrame(out var textureFrame))
         {
-          yield return new WaitForEndOfFrame();
+          yield return null;
           continue;
         }
 
+        yield return waitForEndOfFrame;
         // Copy current image to TextureFrame
         if (canUseGpuImage)
         {
-          yield return new WaitForEndOfFrame();
           textureFrame.ReadTextureOnGPU(imageSource.GetCurrentTexture());
         }
         else
         {
-          req = textureFrame.ReadTextureAsync(imageSource.GetCurrentTexture());
-          yield return waitUntilReqDone;
-
-          if (req.hasError)
-          {
-            Debug.LogError($"Failed to read texture from the image source, exiting...");
-            break;
-          }
+          textureFrame.ReadTextureOnCPU(imageSource.GetCurrentTexture(), false, imageSource.isVerticallyFlipped);
         }
 
         graphRunner.AddTextureFrameToInputStream(textureFrame, glContext);
@@ -112,18 +112,15 @@ namespace Mediapipe.Unity.Sample.MediaPipeVideo
           continue;
         }
 
-        if (runningMode.IsSynchronous())
-        {
-          var task = graphRunner.WaitNextAsync();
-          yield return new WaitUntil(() => task.IsCompleted);
+        var task = graphRunner.WaitNextAsync();
+        yield return new WaitUntil(() => task.IsCompleted);
 
-          var imageFrame = task.Result;
-          if (imageFrame != null)
-          {
-            _outputTexture.LoadRawTextureData(imageFrame.MutablePixelData(), imageFrame.PixelDataSize());
-            _outputTexture.Apply();
-            imageFrame.Dispose();
-          }
+        var imageFrame = task.Result;
+        if (imageFrame != null)
+        {
+          _outputTexture.LoadRawTextureData(imageFrame.MutablePixelData(), imageFrame.PixelDataSize());
+          _outputTexture.Apply();
+          imageFrame.Dispose();
         }
       }
     }

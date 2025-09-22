@@ -44,12 +44,13 @@ namespace Mediapipe
           : this(format, width, height, widthStep, pixelData, _VoidDeleter)
     { }
 
-    // TODO: detect format from the texture
     public Image(ImageFormat.Types.Format format, Texture2D texture) :
         this(format, texture.width, texture.height, format.NumberOfChannels() * texture.width, texture.GetRawTextureData<byte>())
     { }
 
-#if UNITY_EDITOR_LINUX || UNITY_STANDLONE_LINUX || UNITY_ANDROID
+    public Image(Texture2D texture) : this(texture.format.ToImageFormat(), texture) { }
+
+#if UNITY_EDITOR_LINUX || UNITY_STANDALONE_LINUX || UNITY_ANDROID
     public Image(uint target, uint name, int width, int height, GpuBufferFormat format, GlTextureBuffer.DeletionCallback callback, GlContext glContext) : base()
     {
       UnsafeNativeMethods.mp_Image__ui_ui_i_i_ui_PF_PSgc(target, name, width, height, format, callback, glContext.sharedPtr, out var ptr).Assert();

@@ -24,7 +24,7 @@ namespace Mediapipe.Unity.Sample
 
     private IEnumerator Init()
     {
-      //Debug.Log("The configuration for the sample app can be modified using AppSettings.asset.");
+      Debug.Log("The configuration for the sample app can be modified using AppSettings.asset.");
 #if !DEBUG && !DEVELOPMENT_BUILD
       Debug.LogWarning("Logging for the MediaPipeUnityPlugin will be suppressed. To enable logging, please check the 'Development Build' option and build.");
 #endif
@@ -35,8 +35,8 @@ namespace Mediapipe.Unity.Sample
 
       Debug.Log("Setting global flags...");
       _appSettings.ResetGlogFlags();
-      //Glog.Initialize("MediaPipeUnityPlugin");
-      //_isGlogInitialized = true;
+      Glog.Initialize("MediaPipeUnityPlugin");
+      _isGlogInitialized = true;
 
       Debug.Log("Initializing AssetLoader...");
       switch (_appSettings.assetLoaderType)
@@ -105,10 +105,10 @@ namespace Mediapipe.Unity.Sample
     {
       GpuManager.Shutdown();
 
-      //if (_isGlogInitialized)
-      //{
-      //  Glog.Shutdown();
-      //}
+      if (_isGlogInitialized)
+      {
+        Glog.Shutdown();
+      }
 
       Protobuf.ResetLogHandler();
     }

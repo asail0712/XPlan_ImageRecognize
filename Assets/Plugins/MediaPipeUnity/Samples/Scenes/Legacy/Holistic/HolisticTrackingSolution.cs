@@ -63,6 +63,13 @@ namespace Mediapipe.Unity.Sample.Holistic
       set => graphRunner.minTrackingConfidence = value;
     }
 
+    public override void Stop()
+    {
+      base.Stop();
+      _textureFramePool?.Dispose();
+      _textureFramePool = null;
+    }
+
     protected override IEnumerator Run()
     {
       var graphInitRequest = graphRunner.WaitForInit(runningMode);
@@ -140,13 +147,14 @@ namespace Mediapipe.Unity.Sample.Holistic
         }
         else
         {
-          req = textureFrame.ReadTextureAsync(imageSource.GetCurrentTexture());
+          req = textureFrame.ReadTextureAsync(imageSource.GetCurrentTexture(), false, imageSource.isVerticallyFlipped);
           yield return waitUntilReqDone;
 
           if (req.hasError)
           {
-            Debug.LogError($"Failed to read texture from the image source, exiting...");
-            break;
+            Debug.LogWarning($"Failed to read texture from the image source");
+            yield return new WaitForEndOfFrame();
+            continue;
           }
         }
 

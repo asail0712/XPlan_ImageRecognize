@@ -113,6 +113,29 @@ namespace Mediapipe.Tasks.Components.Containers
       destination = new Detection(categories, boundingBox, keypoints);
     }
 
+    public void CloneTo(ref Detection destination)
+    {
+      if (categories == null)
+      {
+        destination = default;
+        return;
+      }
+
+      var dstCategories = destination.categories ?? new List<Category>(categories.Count);
+      dstCategories.Clear();
+      dstCategories.AddRange(categories);
+
+      var dstKeypoints = destination.keypoints;
+      if (keypoints != null)
+      {
+        dstKeypoints ??= new List<NormalizedKeypoint>(keypoints.Count);
+        dstKeypoints.Clear();
+        dstKeypoints.AddRange(keypoints);
+      }
+
+      destination = new Detection(dstCategories, boundingBox, dstKeypoints);
+    }
+
     public override string ToString()
       => $"{{ \"categories\": {Util.Format(categories)}, \"boundingBox\": {boundingBox}, \"keypoints\": {Util.Format(keypoints)} }}";
   }
@@ -166,11 +189,25 @@ namespace Mediapipe.Tasks.Components.Containers
       foreach (var nativeDetection in source.AsReadOnlySpan())
       {
         var detection = detections[i];
-        Detection.Copy(nativeDetection, ref detection);
+        Detection.Copy(in nativeDetection, ref detection);
         detections[i++] = detection;
       }
 
       destination = new DetectionResult(detections);
+    }
+
+    public void CloneTo(ref DetectionResult destination)
+    {
+      if (detections == null)
+      {
+        destination = default;
+        return;
+      }
+
+      var dstDetections = destination.detections ?? new List<Detection>(detections.Count);
+      dstDetections.CopyFrom(detections);
+
+      destination = new DetectionResult(dstDetections);
     }
 
     public override string ToString() => $"{{ \"detections\": {Util.Format(detections)} }}";
