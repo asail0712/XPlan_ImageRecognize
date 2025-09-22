@@ -40,8 +40,6 @@
 				float depth : SV_Depth;
 			};
 
-			uint _UseAlpha;
-
 			uint _TexResX;
 			uint _TexResY;
 
@@ -140,12 +138,6 @@
 
 				float4 color = tex2D(_ColorTex, i.uv);
 				float alpha = tex2D(_AlphaTex, i.uv).a;
-
-				if (_UseAlpha == 0)
-				{
-					alpha = tex2D(_AlphaTex, i.uv).r;
-				}
-
 				float a = alpha < 0.5 ? 0.0 : 1.0;
 
 				o.color = color;
