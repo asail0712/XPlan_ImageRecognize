@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using UnityEngine;
@@ -63,6 +61,8 @@ namespace XPlan.ImageRecognize
 
         public override void Stop()
         {
+            base.Stop();
+
             _segmentationMaskStream?.Dispose();
             _segmentationMaskStream = null;
         }
@@ -121,32 +121,7 @@ namespace XPlan.ImageRecognize
 
                 var extensionRegistry       = new ExtensionRegistry() { TensorsToDetectionsCalculatorOptions.Extensions.Ext, ThresholdingCalculatorOptions.Extensions.Ext };
                 var cannonicalizedConfig    = validatedGraphConfig.Config(extensionRegistry);
-
-                //var poseDetectionCalculatorPattern = new Regex("__posedetection[a-z]+__TensorsToDetectionsCalculator$");
-                //var tensorsToDetectionsCalculators = cannonicalizedConfig.Node.Where((node) => poseDetectionCalculatorPattern.Match(node.Name).Success).ToList();
-
-                //var poseTrackingCalculatorPattern   = new Regex("tensorstoposelandmarksandsegmentation__ThresholdingCalculator$");
-                //var thresholdingCalculators         = cannonicalizedConfig.Node.Where((node) => poseTrackingCalculatorPattern.Match(node.Name).Success).ToList();
-
-                //foreach (var calculator in tensorsToDetectionsCalculators)
-                //{
-                //    if (calculator.Options.HasExtension(TensorsToDetectionsCalculatorOptions.Extensions.Ext))
-                //    {
-                //        var options             = calculator.Options.GetExtension(TensorsToDetectionsCalculatorOptions.Extensions.Ext);
-                //        options.MinScoreThresh  = minDetectionConfidence;
-                //        Debug.Log($"Min Detection Confidence = {minDetectionConfidence}");
-                //    }
-                //}
-
-                //foreach (var calculator in thresholdingCalculators)
-                //{
-                //    if (calculator.Options.HasExtension(ThresholdingCalculatorOptions.Extensions.Ext))
-                //    {
-                //        var options         = calculator.Options.GetExtension(ThresholdingCalculatorOptions.Extensions.Ext);
-                //        options.Threshold   = minTrackingConfidence;
-                //        Debug.Log($"Min Tracking Confidence = {minTrackingConfidence}");
-                //    }
-                //}
+                
                 calculatorGraph.Initialize(cannonicalizedConfig);
             }
         }
