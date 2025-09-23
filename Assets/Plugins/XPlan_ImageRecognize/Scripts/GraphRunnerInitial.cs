@@ -42,11 +42,14 @@ namespace XPlan.ImageRecognize
             bootstrapObj.name       = _BootstrapName;
             Bootstrap bootstrap     = bootstrapObj.GetComponent<Bootstrap>();
             GameObject.DontDestroyOnLoad(bootstrapObj);
+
             yield return new WaitUntil(() => bootstrap.isFinished);
 
-            // 等待graphRunner初始化
+            // 等待graphRunner初始化(用以初始化Mediapipe)
             WaitForResult graphInitRequest  = graphRunner.WaitForInit(runningMode);
+
             yield return graphInitRequest;
+
             if (graphInitRequest.isError)
             {
                 Debug.LogError(graphInitRequest.error);

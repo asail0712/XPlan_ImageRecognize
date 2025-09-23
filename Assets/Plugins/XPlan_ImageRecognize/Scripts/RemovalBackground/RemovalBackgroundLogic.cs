@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -10,7 +8,6 @@ using Mediapipe.Unity;
 using Mediapipe.Unity.Sample;
 
 using XPlan.Observe;
-using XPlan.UI;
 
 using TextureFramePool = Mediapipe.Unity.Experimental.TextureFramePool;
 
@@ -177,7 +174,6 @@ namespace XPlan.ImageRecognize
             {
                 return;
             }
-
 
             bool bResult = false;
 

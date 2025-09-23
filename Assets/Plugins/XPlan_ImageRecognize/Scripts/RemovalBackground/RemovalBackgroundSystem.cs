@@ -1,15 +1,5 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Rendering;
-
-using Mediapipe;
 using Mediapipe.Unity;
-using Mediapipe.Unity.Sample;
-
-using XPlan;
 
 namespace XPlan.ImageRecognize
 {    
@@ -30,8 +20,11 @@ namespace XPlan.ImageRecognize
 
         protected override void OnInitialLogic()
         {
+            // 初始化GraphRunner與Mediapipe相關
             RegisterLogic(new GraphRunnerInitial(graphRunner, runningMode, bootstrapPrefab));
+            // 設定影像來源，是Camera或是Kinect(目前就這兩種選項)
             RegisterLogic(new TextureInitial(imgSourceType));
+            // 當生成影像與顯示影像都準備好了，就可以開始顯示
             RegisterLogic(new RemovalBackgroundLogic(tickTime, maskType));
         }
     }
