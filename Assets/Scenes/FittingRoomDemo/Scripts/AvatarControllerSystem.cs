@@ -26,7 +26,7 @@ namespace XPlan.ImageRecognize.Demo
         protected override void OnInitialLogic()
         {
             RegisterLogic(new AvatarController(fittingAvatarGO));
-            RegisterLogic(new ImageUIInitial());
+            RegisterLogic(new ImageInitial());
         }
     }
 }

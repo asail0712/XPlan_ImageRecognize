@@ -15,14 +15,12 @@ namespace XPlan.ImageRecognize
 {
     public readonly struct PoseEstimationResult
     {
-        public readonly Detection poseDetection;
         public readonly NormalizedLandmarkList poseLandmarks;
         public readonly LandmarkList poseWorldLandmarks;
 
-        public PoseEstimationResult(Detection poseDetection, NormalizedLandmarkList poseLandmarks, 
+        public PoseEstimationResult(NormalizedLandmarkList poseLandmarks, 
                                     LandmarkList poseWorldLandmarks)
         {
-            this.poseDetection      = poseDetection;
             this.poseLandmarks      = poseLandmarks;
             this.poseWorldLandmarks = poseWorldLandmarks;
         }
@@ -54,12 +52,6 @@ namespace XPlan.ImageRecognize
             set => _minTrackingConfidence = Mathf.Clamp01(value);
         }
 
-        public event EventHandler<OutputStream<Detection>.OutputEventArgs> OnPoseDetectionOutput
-        {
-            add => _poseDetectionStream.AddListener(value, timeoutMicrosec);
-            remove => _poseDetectionStream.RemoveListener(value);
-        }
-
         public event EventHandler<OutputStream<NormalizedLandmarkList>.OutputEventArgs> OnPoseLandmarksOutput
         {
             add => _poseLandmarksStream.AddListener(value, timeoutMicrosec);
@@ -73,11 +65,9 @@ namespace XPlan.ImageRecognize
         }
 
         private const string _InputStreamName               = "input_video";
-        private const string _PoseDetectionStreamName       = "pose_detection";
         private const string _PoseLandmarksStreamName       = "pose_landmarks";
         private const string _PoseWorldLandmarksStreamName  = "pose_world_landmarks";
         
-        private OutputStream<Detection> _poseDetectionStream;
         private OutputStream<NormalizedLandmarkList> _poseLandmarksStream;
         private OutputStream<LandmarkList> _poseWorldLandmarksStream;
         
@@ -86,7 +76,6 @@ namespace XPlan.ImageRecognize
         {
             if (runningMode.IsSynchronous())
             {
-                _poseDetectionStream.StartPolling();
                 _poseLandmarksStream.StartPolling();
                 _poseWorldLandmarksStream.StartPolling();
             }
@@ -98,11 +87,9 @@ namespace XPlan.ImageRecognize
         {
             base.Stop();
 
-            _poseDetectionStream?.Dispose();
             _poseLandmarksStream?.Dispose();
             _poseWorldLandmarksStream?.Dispose();
 
-            _poseDetectionStream        = null;
             _poseLandmarksStream        = null;
             _poseWorldLandmarksStream   = null;
         }
@@ -115,26 +102,21 @@ namespace XPlan.ImageRecognize
         public async Task<PoseEstimationResult> WaitNextAsync()
         {
             var results = await WhenAll(
-                    _poseDetectionStream.WaitNextAsync(),
                     _poseLandmarksStream.WaitNextAsync(),
                     _poseWorldLandmarksStream.WaitNextAsync()
                   );
             AssertResult(results);
 
-            _ = TryGetValue(results.Item1.packet, out var poseDetection, (packet) =>
-            {
-                return packet.Get(Detection.Parser);
-            });
-            _ = TryGetValue(results.Item2.packet, out var poseLandmarks, (packet) =>
+            _ = TryGetValue(results.Item1.packet, out var poseLandmarks, (packet) =>
             {
                 return packet.Get(NormalizedLandmarkList.Parser);
             });
-            _ = TryGetValue(results.Item3.packet, out var poseWorldLandmarks, (packet) =>
+            _ = TryGetValue(results.Item2.packet, out var poseWorldLandmarks, (packet) =>
             {
                 return packet.Get(LandmarkList.Parser);
             });
 
-            return new PoseEstimationResult(poseDetection, poseLandmarks, poseWorldLandmarks);
+            return new PoseEstimationResult(poseLandmarks, poseWorldLandmarks);
         }
 
         protected override IList<WaitForResult> RequestDependentAssets()
@@ -166,7 +148,6 @@ namespace XPlan.ImageRecognize
         protected override void ConfigureCalculatorGraph(CalculatorGraphConfig config)
         {
             // 初始化與 Pose 相關的輸出流
-            _poseDetectionStream        = new OutputStream<Detection>(calculatorGraph, _PoseDetectionStreamName, true);
             _poseLandmarksStream        = new OutputStream<NormalizedLandmarkList>(calculatorGraph, _PoseLandmarksStreamName, true);
             _poseWorldLandmarksStream   = new OutputStream<LandmarkList>(calculatorGraph, _PoseWorldLandmarksStreamName, true);
 
@@ -214,16 +195,16 @@ namespace XPlan.ImageRecognize
 
             // TODO: refactoring
             // The orientation of the output image must match that of the input image.
-            var isInverted = ImageCoordinate.IsInverted(imageSource.rotation);
-            var outputRotation = imageSource.rotation;
-            var outputHorizontallyFlipped = !isInverted && imageSource.isHorizontallyFlipped;
-            var outputVerticallyFlipped = (!runningMode.IsSynchronous() && imageSource.isVerticallyFlipped) ^ (isInverted && imageSource.isHorizontallyFlipped);
+            var isInverted                  = ImageCoordinate.IsInverted(imageSource.rotation);
+            var outputRotation              = imageSource.rotation;
+            var outputHorizontallyFlipped   = !isInverted && imageSource.isHorizontallyFlipped;
+            var outputVerticallyFlipped     = (!runningMode.IsSynchronous() && imageSource.isVerticallyFlipped) ^ (isInverted && imageSource.isHorizontallyFlipped);
 
             if ((outputHorizontallyFlipped && outputVerticallyFlipped) || outputRotation == RotationAngle.Rotation180)
             {
-                outputRotation = outputRotation.Add(RotationAngle.Rotation180);
-                outputHorizontallyFlipped = !outputHorizontallyFlipped;
-                outputVerticallyFlipped = !outputVerticallyFlipped;
+                outputRotation              = outputRotation.Add(RotationAngle.Rotation180);
+                outputHorizontallyFlipped   = !outputHorizontallyFlipped;
+                outputVerticallyFlipped     = !outputVerticallyFlipped;
             }
 
             sidePacket.Emplace("output_rotation", Packet.CreateInt((int)outputRotation));

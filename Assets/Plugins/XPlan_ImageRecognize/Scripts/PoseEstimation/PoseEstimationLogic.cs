@@ -64,7 +64,6 @@ namespace XPlan.ImageRecognize
 
             if (!runningMode.IsSynchronous())
             {
-                graphRunner.OnPoseDetectionOutput       += OnPoseDetectionOutput;
                 graphRunner.OnPoseLandmarksOutput       += OnPoseLandmarksOutput;
                 graphRunner.OnPoseWorldLandmarksOutput  += OnPoseWorldLandmarksOutput;
             }
@@ -124,13 +123,6 @@ namespace XPlan.ImageRecognize
             }
         }
 
-        private void OnPoseDetectionOutput(object stream, OutputStream<Detection>.OutputEventArgs eventArgs)
-        {
-            var packet = eventArgs.packet;
-            var value = packet == null ? default : packet.Get(Detection.Parser);
-            //_poseDetectionAnnotationController.DrawLater(value);
-        }
-
         private void OnPoseLandmarksOutput(object stream, OutputStream<NormalizedLandmarkList>.OutputEventArgs eventArgs)
         {
             var packet = eventArgs.packet;
@@ -143,13 +135,6 @@ namespace XPlan.ImageRecognize
             var packet = eventArgs.packet;
             var value = packet == null ? default : packet.Get(LandmarkList.Parser);
             //_poseWorldLandmarksAnnotationController.DrawLater(value);
-        }
-
-        private void OnPoseRoiOutput(object stream, OutputStream<NormalizedRect>.OutputEventArgs eventArgs)
-        {
-            var packet = eventArgs.packet;
-            var value = packet == null ? default : packet.Get(NormalizedRect.Parser);
-            //_poseRoiAnnotationController.DrawLater(value);
         }
     }
 }

@@ -9,7 +9,8 @@ namespace XPlan.ImageRecognize.Demo
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         protected override void OnInitialLogic()
         {
-            RegisterLogic(new ImageUIInitial());
+            RegisterLogic(new ImageInitial());
+            RegisterLogic(new MaskInitial());
         }
     }
 }
