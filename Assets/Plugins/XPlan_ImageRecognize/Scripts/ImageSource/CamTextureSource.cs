@@ -88,6 +88,13 @@ namespace XPlan.ImageRecognize
 
         public override IEnumerator Play()
         {
+            if(webCamController == null)
+            {
+                LogSystem.Record("Web Cam is not initial", LogType.Error);
+
+                yield break;
+            }
+
             webCamController.Play();
             yield return new WaitUntil(() => webCamController.IsDeviceReady());
         }

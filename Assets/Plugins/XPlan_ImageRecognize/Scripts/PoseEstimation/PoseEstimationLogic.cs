@@ -1,18 +1,38 @@
-using System.Collections;
-using System.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.Rendering;
-
+using Google.Protobuf.WellKnownTypes;
 using Mediapipe;
 using Mediapipe.Unity;
 using Mediapipe.Unity.Sample;
-
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.Rendering;
 using XPlan.Observe;
-
 using TextureFramePool = Mediapipe.Unity.Experimental.TextureFramePool;
 
 namespace XPlan.ImageRecognize
 {    
+    public class PoseLandListMsg : MessageBase
+    {
+        public List<Vector3> landmarkList;
+
+        public PoseLandListMsg(List<Vector3> landmarkList)
+        {
+            this.landmarkList = landmarkList;
+        }
+    }
+
+    public class PoseWorldLandListMsg : MessageBase
+    {
+        public List<Vector3> landmarkList;
+
+        public PoseWorldLandListMsg(List<Vector3> landmarkList)
+        {
+            this.landmarkList = landmarkList;
+        }
+    }
+
+
     public class PoseEstimationLogic : LogicComponent
     {
         private PoseEstimationGraph graphRunner;
@@ -39,8 +59,6 @@ namespace XPlan.ImageRecognize
             RegisterNotify<TexturePrepareMsg>((msg) =>
             {
                 imageSource     = msg.imageSource;
-                //maskArray       = new float[imageSource.textureWidth * imageSource.textureHeight];
-                //maskColorArray  = new Color32[imageSource.textureWidth * imageSource.textureHeight];
 
                 StartRun();
             });
@@ -118,23 +136,65 @@ namespace XPlan.ImageRecognize
                     yield return new WaitUntil(() => task.IsCompleted);
 
                     PoseEstimationResult result      = task.Result;
-                    //ProcessImageFrame(result.poseDetection, result.poseLandmarks, result.poseWorldLandmarks, result.poseRoi);                    
+
+                    ProcessPoseLandmark(result.poseLandmarks);
+                    ProcessPoseWorldLandmark(result.poseWorldLandmarks);
                 }
             }
         }
 
         private void OnPoseLandmarksOutput(object stream, OutputStream<NormalizedLandmarkList>.OutputEventArgs eventArgs)
         {
-            var packet = eventArgs.packet;
-            var value = packet == null ? default : packet.Get(NormalizedLandmarkList.Parser);
-            //_holisticAnnotationController.DrawPoseLandmarkListLater(value);
+            var packet  = eventArgs.packet;
+            var value   = packet == null ? default : packet.Get(NormalizedLandmarkList.Parser);
+
+            ProcessPoseLandmark((NormalizedLandmarkList)value);
         }
 
         private void OnPoseWorldLandmarksOutput(object stream, OutputStream<LandmarkList>.OutputEventArgs eventArgs)
         {
             var packet = eventArgs.packet;
             var value = packet == null ? default : packet.Get(LandmarkList.Parser);
-            //_poseWorldLandmarksAnnotationController.DrawLater(value);
+
+            ProcessPoseWorldLandmark((LandmarkList)value);
+        }
+
+        private void ProcessPoseLandmark(NormalizedLandmarkList poseLandmarkList)
+        {
+            if (poseLandmarkList == null)
+            {
+                return;
+            }
+
+            List<Vector3> posLost                           = new List<Vector3>();
+            IReadOnlyList<NormalizedLandmark> landmarkList  = poseLandmarkList.Landmark;
+
+            for (int i = 0; i < landmarkList.Count; ++i)
+            {
+                Vector3 p = new Vector3(landmarkList[i].X, landmarkList[i].Y, 0f);
+                posLost.Add(p);
+            }
+
+            SendGlobalMsg<PoseLandListMsg>(posLost);
+        }
+
+        private void ProcessPoseWorldLandmark(LandmarkList poseWorldLandmarkList)
+        {
+            if (poseWorldLandmarkList == null)
+            {
+                return;
+            }
+
+            List<Vector3> posLost                   = new List<Vector3>();
+            IReadOnlyList<Landmark> landmarkList    = poseWorldLandmarkList.Landmark;
+
+            for (int i = 0; i < landmarkList.Count; ++i)
+            {
+                Vector3 p = new Vector3(landmarkList[i].X, landmarkList[i].Y, landmarkList[i].Z);
+                posLost.Add(p);
+            }
+
+            SendGlobalMsg<PoseWorldLandListMsg>(posLost);
         }
     }
 }
