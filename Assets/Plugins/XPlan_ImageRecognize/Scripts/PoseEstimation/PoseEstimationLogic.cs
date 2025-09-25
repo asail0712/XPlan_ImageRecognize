@@ -163,6 +163,7 @@ namespace XPlan.ImageRecognize
         {
             if (poseLandmarkList == null)
             {
+                SendGlobalMsg<PoseLandListMsg>(new List<Vector3>());
                 return;
             }
 
@@ -182,6 +183,7 @@ namespace XPlan.ImageRecognize
         {
             if (poseWorldLandmarkList == null)
             {
+                SendGlobalMsg<PoseWorldLandListMsg>(new List<Vector3>());
                 return;
             }
 

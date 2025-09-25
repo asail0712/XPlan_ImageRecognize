@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 
 using UnityEngine;
+using UnityEngine.UI;
 using XPlan.UI;
 using XPlan.Utility;
 
@@ -9,12 +10,17 @@ namespace XPlan.ImageRecognize.Demo
     public class PoseUI : UIBase
     {
         [SerializeField] private GameObject pointPrefab;
+        [SerializeField] private GameObject linePrefab;
         [SerializeField] private GameObject pointRoot;
+        [SerializeField] private GameObject lineRoot;
 
-        private List<GameObject> poseGoList;
-        private List<Vector3> posList;
         private static int MaxPointNum = 33;
-        
+
+        private List<UIPoint> pointList;
+        private List<UILine> lineList;
+        private bool bReceiveData;
+        private float showTime;
+
         private Rect rect;
         private float w;
         private float h;
@@ -22,50 +28,73 @@ namespace XPlan.ImageRecognize.Demo
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         private void Awake()
         {
-            poseGoList  = new List<GameObject>();
-            posList     = null;
-            
+            pointList       = new List<UIPoint>();
+            lineList        = new List<UILine>();
+            bReceiveData    = false;
+
             rect        = transform.parent.gameObject.GetComponent<RectTransform>().rect;
             w           = rect.width;
             h           = rect.height;
 
-
             for (int i = 0; i < MaxPointNum; ++i)
             {
                 GameObject pointGO = GameObject.Instantiate(pointPrefab);
-
-                poseGoList.Add(pointGO);
+                pointList.Add(pointGO.GetComponent<UIPoint>());
                 pointRoot.AddChild(pointGO);
+            }
+
+            for (int i = 0; i < CommonDefine.Connections.Count; ++i)
+            {
+                GameObject lineGO = GameObject.Instantiate(linePrefab);                
+                lineList.Add(lineGO.GetComponent<UILine>());
+                lineRoot.AddChild(lineGO);
             }
 
             ListenCall<List<Vector3>>(UICommand.UpdatePos, (posList) => 
             {
-                if(posList.Count != MaxPointNum)
+                if (posList == null || MaxPointNum != posList.Count)
                 {
                     return;
                 }
 
-                this.posList = posList;
+                bReceiveData    = true;
+                showTime        = 0f;
+
+                for (int i = 0; i < MaxPointNum; ++i)
+                {
+                    Vector3 mediapipeXYZ = posList[i];
+
+                    pointList[i].SetPos(mediapipeXYZ, w, h);
+                }
+
+                for(int i = 0; i < CommonDefine.Connections.Count; ++i)
+                {
+                    var pair    = CommonDefine.Connections[i];
+                    int idx1    = pair.Item1;
+                    int idx2    = pair.Item2;
+
+                    UILine line     = lineList[i];
+                    line.start      = pointList[idx1].Vec2D;
+                    line.end        = pointList[idx2].Vec2D;
+                    line.thickness  = 3f;
+                }
             });
         }
 
         private void Update()
         {
-            if(posList == null)
+            if(bReceiveData)
             {
-                return;
+                showTime += Time.deltaTime;
+
+                if(showTime > 0.3f)
+                {
+                    bReceiveData = false;
+                }
             }
 
-            for (int i = 0; i < MaxPointNum; ++i)
-            {
-                Vector3 mediapipeXYZ = posList[i];
-
-                float xDisp = (mediapipeXYZ.x - 0.5f) * w;  // 以中心為原點
-                float yDisp = (0.5f - mediapipeXYZ.y) * h;  // 垂直方向轉換 + 以中心為原點
-                float zDisp = 0f;
-
-                poseGoList[i].transform.localPosition = new Vector3(xDisp, yDisp, zDisp);
-            }
+            pointRoot.SetActive(bReceiveData);
+            lineRoot.SetActive(bReceiveData);
         }
     }
 }
