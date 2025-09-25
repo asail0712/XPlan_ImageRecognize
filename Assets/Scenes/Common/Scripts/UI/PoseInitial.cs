@@ -15,7 +15,7 @@ namespace XPlan.ImageRecognize.Demo
         {
             RegisterNotify<PoseLandListMsg>((msg) => 
             {
-                DirectCallUI<List<Vector3>>(UICommand.UpdatePos, msg.landmarkList);
+                DirectCallUI<(List<Vector3>, bool)>(UICommand.UpdatePos, (msg.landmarkList, msg.bIsMirror));
             });
 
             RegisterNotify<PoseWorldLandListMsg>((msg) =>

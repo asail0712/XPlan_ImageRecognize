@@ -16,52 +16,35 @@ namespace XPlan.ImageRecognize
 
         public override string sourceName
         {
-            get
-            {
-                return (webCamController == null) ? null : webCamController.GetDeviceName();
-            }
+            get =>(webCamController == null) ? null : webCamController.GetDeviceName();
         }
         public override string[] sourceCandidateNames
         {
-            get
-            {
-                return WebCamTexture.devices.Select(device => device.name).ToArray();
-            }
+            get => WebCamTexture.devices.Select(device => device.name).ToArray();
         }
         public override ResolutionStruct[] availableResolutions
         {
-            get
-            {
-                return webCamDevice.name == ""? null : webCamDevice.availableResolutions.Select(resolution => new ResolutionStruct(resolution)).ToArray();
-            }
+            get => webCamDevice.name == ""? null : webCamDevice.availableResolutions.Select(resolution => new ResolutionStruct(resolution)).ToArray();
         }
         public override bool isPrepared
         {
-            get
-            {
-                 return webCamController != null;
-            }
+            get => webCamController != null;
         }
         public override bool isPlaying
         {
-            get
-            {
-                 return webCamController != null && webCamController.IsPlaying();
-            }
+            get => webCamController != null && webCamController.IsPlaying();
         }
         public override int textureWidth
         { 
-            get
-            {
-                return !isPrepared ? 0 : webCamController.Width;
-            }
+            get => !isPrepared ? 0 : webCamController.Width;
         }
         public override int textureHeight
         {
-            get
-            {
-                return !isPrepared ? 0 : webCamController.Height;
-            }
+            get => !isPrepared ? 0 : webCamController.Height;
+        }
+        public override bool isFrontFacing 
+        {
+            get => true;
         }
 
         public CamTextureSource()

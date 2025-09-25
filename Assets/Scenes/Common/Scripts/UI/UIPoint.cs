@@ -31,9 +31,9 @@ namespace XPlan.ImageRecognize.Demo
             dispVec = Vector3.zero;
         }
 
-        public void SetPos(Vector3 pos, float w, float h)
+        public void SetPos(Vector3 pos, float w, float h, bool bMirror)
         {
-            float xDisp = (pos.x - 0.5f) * w;  // 以中心為原點
+            float xDisp = (bMirror? (0.5f - pos.x) : (pos.x - 0.5f)) * w;  // 以中心為原點
             float yDisp = (0.5f - pos.y) * h;  // 垂直方向轉換 + 以中心為原點
             float zDisp = 0f;
 

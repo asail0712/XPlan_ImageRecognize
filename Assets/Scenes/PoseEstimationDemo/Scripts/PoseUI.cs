@@ -50,8 +50,11 @@ namespace XPlan.ImageRecognize.Demo
                 lineRoot.AddChild(lineGO);
             }
 
-            ListenCall<List<Vector3>>(UICommand.UpdatePos, (posList) => 
+            ListenCall<(List<Vector3>, bool)>(UICommand.UpdatePos, (param) => 
             {
+                List<Vector3> posList   = param.Item1;
+                bool bMirror            = param.Item2;
+
                 if (posList == null || MaxPointNum != posList.Count)
                 {
                     return;
@@ -64,7 +67,7 @@ namespace XPlan.ImageRecognize.Demo
                 {
                     Vector3 mediapipeXYZ = posList[i];
 
-                    pointList[i].SetPos(mediapipeXYZ, w, h);
+                    pointList[i].SetPos(mediapipeXYZ, w, h, bMirror);
                 }
 
                 for(int i = 0; i < CommonDefine.Connections.Count; ++i)

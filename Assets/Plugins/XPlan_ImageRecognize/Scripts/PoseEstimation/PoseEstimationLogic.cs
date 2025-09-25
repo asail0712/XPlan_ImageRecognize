@@ -15,20 +15,24 @@ namespace XPlan.ImageRecognize
     public class PoseLandListMsg : MessageBase
     {
         public List<Vector3> landmarkList;
+        public bool bIsMirror;
 
-        public PoseLandListMsg(List<Vector3> landmarkList)
+        public PoseLandListMsg(List<Vector3> landmarkList, bool bIsMirror)
         {
-            this.landmarkList = landmarkList;
+            this.landmarkList   = landmarkList;
+            this.bIsMirror      = bIsMirror;
         }
     }
 
     public class PoseWorldLandListMsg : MessageBase
     {
         public List<Vector3> landmarkList;
+        public bool bIsMirror;
 
-        public PoseWorldLandListMsg(List<Vector3> landmarkList)
+        public PoseWorldLandListMsg(List<Vector3> landmarkList, bool bIsMirror)
         {
-            this.landmarkList = landmarkList;
+            this.landmarkList   = landmarkList;
+            this.bIsMirror      = bIsMirror;
         }
     }
 
@@ -39,7 +43,8 @@ namespace XPlan.ImageRecognize
         private RunningMode runningMode;
         private ImageSource imageSource;
 
-        private float tickTime = 0f;
+        private float tickTime  = 0f;
+        private bool bMirror    = false;
 
         public PoseEstimationLogic(float tickTime)
         {
@@ -47,7 +52,9 @@ namespace XPlan.ImageRecognize
             this.runningMode    = RunningMode.Async;
             this.imageSource    = null;
             this.tickTime       = tickTime;
-        
+            this.bMirror        = false;
+
+
             RegisterNotify<GraphRunnerPrepareMsg>((msg) => 
             {
                 runningMode = msg.runningMode;
@@ -94,6 +101,7 @@ namespace XPlan.ImageRecognize
             // NOTE: we can share the GL context of the render thread with MediaPipe (for now, only on Android)
             bool bCanUseGpuImage        = graphRunner.configType == GraphRunner.ConfigType.OpenGLES && GpuManager.GpuResources != null;
             using GlContext glContext   = bCanUseGpuImage ? GpuManager.GetGlContext() : null;
+            bMirror                     = imageSource.isFrontFacing;
 
             while (true)
             {
@@ -163,7 +171,7 @@ namespace XPlan.ImageRecognize
         {
             if (poseLandmarkList == null)
             {
-                SendGlobalMsg<PoseLandListMsg>(new List<Vector3>());
+                SendGlobalMsg<PoseLandListMsg>(new List<Vector3>(), bMirror);
                 return;
             }
 
@@ -176,14 +184,14 @@ namespace XPlan.ImageRecognize
                 posLost.Add(p);
             }
 
-            SendGlobalMsg<PoseLandListMsg>(posLost);
+            SendGlobalMsg<PoseLandListMsg>(posLost, bMirror);
         }
 
         private void ProcessPoseWorldLandmark(LandmarkList poseWorldLandmarkList)
         {
             if (poseWorldLandmarkList == null)
             {
-                SendGlobalMsg<PoseWorldLandListMsg>(new List<Vector3>());
+                SendGlobalMsg<PoseWorldLandListMsg>(new List<Vector3>(), bMirror);
                 return;
             }
 
@@ -196,7 +204,7 @@ namespace XPlan.ImageRecognize
                 posLost.Add(p);
             }
 
-            SendGlobalMsg<PoseWorldLandListMsg>(posLost);
+            SendGlobalMsg<PoseWorldLandListMsg>(posLost, bMirror);
         }
     }
 }
