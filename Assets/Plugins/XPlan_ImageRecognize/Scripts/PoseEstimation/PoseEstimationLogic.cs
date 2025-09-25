@@ -36,6 +36,19 @@ namespace XPlan.ImageRecognize
         }
     }
 
+    public class MediapipeLandmarkListMsg : MessageBase
+    {
+        public LandmarkList landmarkList;
+        public bool bIsMirror;
+
+        public MediapipeLandmarkListMsg(LandmarkList landmarkList, bool bIsMirror)
+        {
+            this.landmarkList   = landmarkList;
+            this.bIsMirror      = bIsMirror;
+
+            Send();
+        }
+    }
 
     public class PoseEstimationLogic : LogicComponent
     {
@@ -189,6 +202,8 @@ namespace XPlan.ImageRecognize
 
         private void ProcessPoseWorldLandmark(LandmarkList poseWorldLandmarkList)
         {
+            new MediapipeLandmarkListMsg(poseWorldLandmarkList, bMirror);
+
             if (poseWorldLandmarkList == null)
             {
                 SendGlobalMsg<PoseWorldLandListMsg>(new List<Vector3>(), bMirror);
