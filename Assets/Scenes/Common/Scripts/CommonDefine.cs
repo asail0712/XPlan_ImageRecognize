@@ -1,3 +1,4 @@
+using RootMotion.Dynamics;
 using System.Collections.Generic;
 using UnityEngine;
 
