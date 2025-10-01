@@ -127,13 +127,7 @@ namespace XPlan.ImageRecognize
             bool wristNotBelowElbow = leftWrist.y <= leftElbow.y;
 
             bool b = elbowFlexed && wristNearShoulder && wristNotBelowElbow;
-
-            if(!b)
-            {
-                int a = 0;
-                a++;
-            }
-
+      
             return elbowFlexed && wristNearShoulder && wristNotBelowElbow;
         }
 

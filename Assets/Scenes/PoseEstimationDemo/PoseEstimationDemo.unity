@@ -187,6 +187,72 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2f6404adac32ac147812c905c6d96812, type: 3}
+--- !u!1 &15570671
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 15570672}
+  - component: {fileID: 15570673}
+  - component: {fileID: 15570674}
+  m_Layer: 0
+  m_Name: PoseEstimation2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &15570672
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 15570671}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -158.02933, y: 36.69615, z: -69.23855}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &15570673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 15570671}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 557d93e34392f864cbd5d0ef53ad170a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  poseRunner: {fileID: 15570674}
+  runningMode: 0
+  imgSourceType: 0
+  numOfPose: 3
+  bMirror: 0
+--- !u!114 &15570674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 15570671}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f49cab019a0fcec42b2a9b0373aacbf4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _bootstrapPrefab: {fileID: 968918444066301895, guid: 1146a9de09159a948b683e94fb3d3c95,
+    type: 3}
+  screen: {fileID: 0}
+  runningMode: 0
 --- !u!1001 &79621167
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1017,8 +1083,8 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 1920, y: 1080}
-  m_ScreenMatchMode: 0
+  m_ReferenceResolution: {x: 2436, y: 1125}
+  m_ScreenMatchMode: 1
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
@@ -1034,8 +1100,8 @@ Canvas:
   m_GameObject: {fileID: 2035573816}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
-  m_Camera: {fileID: 0}
+  m_RenderMode: 1
+  m_Camera: {fileID: 457285158}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -1211,7 +1277,7 @@ PrefabInstance:
     - target: {fileID: 3537753688460325520, guid: 0850eaa51721c4e4f848b283c9cf7bf6,
         type: 3}
       propertyPath: tickTime
-      value: 0
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 3537753688460325520, guid: 0850eaa51721c4e4f848b283c9cf7bf6,
         type: 3}
@@ -1222,6 +1288,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: PoseEstimation
+      objectReference: {fileID: 0}
+    - target: {fileID: 3793240212619543468, guid: 0850eaa51721c4e4f848b283c9cf7bf6,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6513731337218485722, guid: 0850eaa51721c4e4f848b283c9cf7bf6,
+        type: 3}
+      propertyPath: modelComplexity
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6513731337218485722, guid: 0850eaa51721c4e4f848b283c9cf7bf6,
         type: 3}
@@ -1247,3 +1323,4 @@ SceneRoots:
   - {fileID: 4186840}
   - {fileID: 135435179}
   - {fileID: 860274245}
+  - {fileID: 15570672}

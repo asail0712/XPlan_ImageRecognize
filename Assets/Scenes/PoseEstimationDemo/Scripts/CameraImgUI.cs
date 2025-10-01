@@ -37,24 +37,25 @@ namespace XPlan.ImageRecognize.Demo
             float height    = imageSource.textureHeight;
 
             // 設定 Screen Size
+            screen.rectTransform.sizeDelta          = new Vector2(width, height);
+            screen.rectTransform.localEulerAngles   = imageSource.rotation.Reverse().GetEulerAngles();
             ResetUvRect(imageSource);
-            screen.texture                  = imageSource.GetCurrentTexture();
-            screen.rectTransform.sizeDelta  = new Vector2(width, height);
-            AspectRatioFitter ratioFitter   = screen.GetComponent<AspectRatioFitter>();
+            screen.texture                          = imageSource.GetCurrentTexture();
+            //AspectRatioFitter ratioFitter   = screen.GetComponent<AspectRatioFitter>();
 
-            if (ratioFitter == null)
-            {
-                ratioFitter = screen.gameObject.AddComponent<AspectRatioFitter>();
-            }
+            //if (ratioFitter == null)
+            //{
+            //    ratioFitter = screen.gameObject.AddComponent<AspectRatioFitter>();
+            //}
 
-            if (ratioFitter != null)
-            {
-                AspectRatioFitter.AspectMode mode   = AspectRatioFitter.AspectMode.HeightControlsWidth;
-                float aspectRatio                   = width / height;
+            //if (ratioFitter != null)
+            //{
+            //    AspectRatioFitter.AspectMode mode   = AspectRatioFitter.AspectMode.HeightControlsWidth;
+            //    float aspectRatio                   = width / height;
 
-                ratioFitter.aspectRatio = aspectRatio;
-                ratioFitter.aspectMode  = mode;
-            }
+            //    ratioFitter.aspectRatio = aspectRatio;
+            //    ratioFitter.aspectMode  = mode;
+            //}
         }
 
         private void ResetUvRect(ImageSource imageSource)
