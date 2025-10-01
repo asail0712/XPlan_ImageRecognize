@@ -2,6 +2,7 @@ using System.Collections.Generic;
 
 using UnityEngine;
 using UnityEngine.UI;
+using XPlan.Recycle;
 using XPlan.UI;
 using XPlan.Utility;
 
@@ -16,7 +17,8 @@ namespace XPlan.ImageRecognize.Demo
 
         [SerializeField] private RawImage screen;
 
-        private static int MaxPointNum = 33;
+        private static int MaxPose              = 3;
+        private static int PerPoseMaxPointNum   = 33;
 
         private List<UIPoint> pointList;
         private List<UILine> lineList;
@@ -34,26 +36,39 @@ namespace XPlan.ImageRecognize.Demo
             width               = 0f;
             height              = 0f;
 
-            for (int i = 0; i < MaxPointNum; ++i)
+            for (int i = 0; i < PerPoseMaxPointNum * MaxPose; ++i)
             {
                 GameObject pointGO = GameObject.Instantiate(pointPrefab);
                 pointList.Add(pointGO.GetComponent<UIPoint>());
                 pointRoot.AddChild(pointGO);
             }
 
-            for (int i = 0; i < CommonDefine.Connections.Count; ++i)
+            for (int i = 0; i < MaxPose; ++i)
             {
-                GameObject lineGO = GameObject.Instantiate(linePrefab);                
-                lineList.Add(lineGO.GetComponent<UILine>());
-                lineRoot.AddChild(lineGO);
+                for (int j = 0; j < CommonDefine.Connections.Count; ++j)
+                {
+                    GameObject lineGO   = GameObject.Instantiate(linePrefab);
+                    UILine uiLine       = lineGO.GetComponent<UILine>();
+
+                    var pair            = CommonDefine.Connections[j];
+                    int idx1            = pair.Item1 + i * PerPoseMaxPointNum;
+                    int idx2            = pair.Item2 + i * PerPoseMaxPointNum;
+
+                    uiLine.startPT      = pointList[idx1];
+                    uiLine.endPT        = pointList[idx2];
+
+                    lineList.Add(uiLine);
+                    lineRoot.AddChild(lineGO);
+                }
             }
 
-            ListenCall<(List<Vector3>, bool)>(UICommand.UpdatePos, (param) => 
+            ListenCall<(List<Vector3>, int, bool)>(UICommand.UpdatePos, (param) => 
             {
                 List<Vector3> posList   = param.Item1;
-                bool bMirror            = param.Item2;
+                int modelCount          = param.Item2;
+                bool bMirror            = param.Item3;
 
-                if (posList == null || MaxPointNum != posList.Count || width.Equals(0f) || height.Equals(0f))
+                if (posList == null || width.Equals(0f) || height.Equals(0f))
                 {
                     return;
                 }
@@ -61,34 +76,50 @@ namespace XPlan.ImageRecognize.Demo
                 bReceiveData    = true;
                 showTime        = 0f;
 
-                for (int i = 0; i < MaxPointNum; ++i)
+                //Debug.Log($"Count: {modelCount} Len: {posList.Count}");
+
+                for (int i = 0; i < pointList.Count; ++i)
                 {
-                    Vector3 mediapipeXYZ    = posList[i];
-                    
-                    pointList[i].SetPos(mediapipeXYZ, width, height, bMirror);
+                    pointList[i].Enable = i < posList.Count;
+
+                    if (pointList[i].Enable)
+                    {
+                        Vector3 mediapipeXYZ = posList[i];
+                        pointList[i].SetPos(mediapipeXYZ, width, height, bMirror);                        
+                    }
                 }
 
-                for(int i = 0; i < CommonDefine.Connections.Count; ++i)
-                {
-                    var pair    = CommonDefine.Connections[i];
-                    int idx1    = pair.Item1;
-                    int idx2    = pair.Item2;
+                //for (int i = 0; i < lineList.Count; ++i)
+                //{
+                //    bool b = i < modelCount;
 
-                    UILine line     = lineList[i];
-                    line.start      = pointList[idx1].Vec2D;
-                    line.end        = pointList[idx2].Vec2D;
-                    line.thickness  = 3f;
-                }
+                //    for (int j = 0; j < CommonDefine.Connections.Count; ++j)
+                //    {
+                //        var pair    = CommonDefine.Connections[j];
+                //        int idx1    = pair.Item1 + i * PerPoseMaxPointNum;
+                //        int idx2    = pair.Item2 + i * PerPoseMaxPointNum;
+                //        UILine line = lineList[j + i * CommonDefine.Connections.Count];
+
+                //        if(b)
+                //        {
+                //            line.start      = pointList[idx1].Vec2D;
+                //            line.end        = pointList[idx2].Vec2D;
+                //            line.thickness  = 3f;
+                //        }
+
+                //        line.SetEnable(b);
+                //    }
+                //}
             });
         }
 
         private void Update()
         {
-            if(bReceiveData)
+            if (bReceiveData)
             {
                 showTime += Time.deltaTime;
 
-                if(showTime > 0.3f)
+                if (showTime > 0.3f)
                 {
                     bReceiveData = false;
                 }

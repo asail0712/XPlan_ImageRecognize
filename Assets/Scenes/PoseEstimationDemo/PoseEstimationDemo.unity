@@ -199,7 +199,7 @@ GameObject:
   - component: {fileID: 15570673}
   - component: {fileID: 15570674}
   m_Layer: 0
-  m_Name: PoseEstimation2
+  m_Name: PoseEstimationSystem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -233,10 +233,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   poseRunner: {fileID: 15570674}
-  runningMode: 0
-  imgSourceType: 0
-  numOfPose: 3
+  runningMode: 1
+  modelType: 1
+  maxNumOfPose: 3
   bMirror: 0
+  minPoseDetectionConfidence: 0.7
+  minPosePresenceConfidence: 0.8
+  minTrackingConfidence: 0.8
 --- !u!114 &15570674
 MonoBehaviour:
   m_ObjectHideFlags: 0

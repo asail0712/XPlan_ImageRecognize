@@ -35,7 +35,7 @@ namespace XPlan.ImageRecognize
         {
             if (poseLandmarksList == null || poseLandmarksList.Count == 0)
             {
-                SendGlobalMsg<PoseLandListMsg>(new List<Vector3>(), bMirror);
+                SendGlobalMsg<PoseLandListMsg>(new List<Vector3>(), 0, bMirror);
                 return;
             }
 
@@ -43,7 +43,6 @@ namespace XPlan.ImageRecognize
 
             for (int i = 0; i < poseLandmarksList.Count; ++i)
             {
-                posLost.Clear();
                 List<NormalizedLandmark> landmarkList = poseLandmarksList[i].landmarks;
 
                 for (int j = 0; j < landmarkList.Count; ++j)
@@ -51,11 +50,11 @@ namespace XPlan.ImageRecognize
                     Vector3 p = new Vector3(landmarkList[j].x, landmarkList[j].y, 0f);
                     posLost.Add(p);
                 }
-
-                Debug.Log($"Left Ankle {landmarkList[27]}");
-
-                SendGlobalMsg<PoseLandListMsg>(posLost, bMirror);
             }
+
+            Debug.Log($"Count: {poseLandmarksList.Count}");
+
+            SendGlobalMsg<PoseLandListMsg>(posLost, poseLandmarksList.Count, bMirror);
         }
 
         private void ProcessPoseWorldLandmark(List<Landmarks> poseWorldLandmarkList)

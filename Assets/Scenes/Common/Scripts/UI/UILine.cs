@@ -5,13 +5,26 @@ namespace XPlan.ImageRecognize.Demo
 {
     public class UILine : Graphic
     {
-        public Vector2 start    = Vector2.zero;
-        public Vector2 end      = new Vector2(100, 100);
+        public UIPoint startPT  = null;
+        public UIPoint endPT    = null;
         public float thickness  = 5f;
 
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             vh.Clear();
+
+            if (startPT == null || endPT == null)
+            {
+                return;
+            }
+
+            if (!startPT.Enable || !endPT.Enable)
+            {
+                return; // 不呼叫 SetVerticesDirty
+            }
+
+            Vector2 start   = startPT.Vec2D;
+            Vector2 end     = endPT.Vec2D;
 
             Vector2 dir     = (end - start).normalized;
             Vector2 normal  = new Vector2(-dir.y, dir.x) * thickness * 0.5f;

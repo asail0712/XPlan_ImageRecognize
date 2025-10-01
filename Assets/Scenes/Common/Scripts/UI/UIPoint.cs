@@ -8,7 +8,9 @@ namespace XPlan.ImageRecognize.Demo
 {
     public class UIPoint : MonoBehaviour
     {
+        private Image img;
         private Vector3 dispVec;
+        public bool Enable { get; set; }
 
         public float X
         {
@@ -29,6 +31,7 @@ namespace XPlan.ImageRecognize.Demo
         private void Awake()
         {
             dispVec = Vector3.zero;
+            img     = GetComponent<Image>();
         }
 
         public void SetPos(Vector3 pos, float w, float h, bool bMirror)
@@ -43,6 +46,7 @@ namespace XPlan.ImageRecognize.Demo
         private void Update()
         {
             transform.localPosition = dispVec;
+            img.enabled             = Enable;
         }
     }
 }

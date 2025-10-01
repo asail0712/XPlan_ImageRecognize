@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering;
 using XPlan.Observe;
+
 using TextureFramePool = Mediapipe.Unity.Experimental.TextureFramePool;
 
 namespace XPlan.ImageRecognize
@@ -15,11 +16,13 @@ namespace XPlan.ImageRecognize
     public class PoseLandListMsg : MessageBase
     {
         public List<Vector3> landmarkList;
+        public int count;
         public bool bIsMirror;
 
-        public PoseLandListMsg(List<Vector3> landmarkList, bool bIsMirror)
+        public PoseLandListMsg(List<Vector3> landmarkList, int count, bool bIsMirror)
         {
             this.landmarkList   = landmarkList;
+            this.count          = count;
             this.bIsMirror      = bIsMirror;
         }
     }
