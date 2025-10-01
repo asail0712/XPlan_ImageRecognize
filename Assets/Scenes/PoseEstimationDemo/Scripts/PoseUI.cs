@@ -14,27 +14,25 @@ namespace XPlan.ImageRecognize.Demo
         [SerializeField] private GameObject pointRoot;
         [SerializeField] private GameObject lineRoot;
 
+        [SerializeField] private RawImage screen;
+
         private static int MaxPointNum = 33;
 
         private List<UIPoint> pointList;
         private List<UILine> lineList;
         private bool bReceiveData;
         private float showTime;
-
-        private Rect rect;
-        private float w;
-        private float h;
+        private float width;
+        private float height;
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         private void Awake()
         {
-            pointList       = new List<UIPoint>();
-            lineList        = new List<UILine>();
-            bReceiveData    = false;
-
-            rect        = transform.parent.gameObject.GetComponent<RectTransform>().rect;
-            w           = rect.width;
-            h           = rect.height;
+            pointList           = new List<UIPoint>();
+            lineList            = new List<UILine>();
+            bReceiveData        = false;
+            width               = 0f;
+            height              = 0f;
 
             for (int i = 0; i < MaxPointNum; ++i)
             {
@@ -55,7 +53,7 @@ namespace XPlan.ImageRecognize.Demo
                 List<Vector3> posList   = param.Item1;
                 bool bMirror            = param.Item2;
 
-                if (posList == null || MaxPointNum != posList.Count)
+                if (posList == null || MaxPointNum != posList.Count || width.Equals(0f) || height.Equals(0f))
                 {
                     return;
                 }
@@ -65,9 +63,9 @@ namespace XPlan.ImageRecognize.Demo
 
                 for (int i = 0; i < MaxPointNum; ++i)
                 {
-                    Vector3 mediapipeXYZ = posList[i];
-
-                    pointList[i].SetPos(mediapipeXYZ, w, h, bMirror);
+                    Vector3 mediapipeXYZ    = posList[i];
+                    
+                    pointList[i].SetPos(mediapipeXYZ, width, height, bMirror);
                 }
 
                 for(int i = 0; i < CommonDefine.Connections.Count; ++i)
@@ -98,6 +96,9 @@ namespace XPlan.ImageRecognize.Demo
 
             pointRoot.SetActive(bReceiveData);
             lineRoot.SetActive(bReceiveData);
+
+            width   = screen.rectTransform.sizeDelta.x;
+            height  = screen.rectTransform.sizeDelta.y;
         }
     }
 }
