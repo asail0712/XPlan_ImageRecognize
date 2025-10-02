@@ -240,6 +240,7 @@ MonoBehaviour:
   minPoseDetectionConfidence: 0.7
   minPosePresenceConfidence: 0.8
   minTrackingConfidence: 0.8
+  numShowPose: 1
 --- !u!114 &15570674
 MonoBehaviour:
   m_ObjectHideFlags: 0

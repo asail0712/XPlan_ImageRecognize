@@ -62,11 +62,10 @@ namespace XPlan.ImageRecognize.Demo
                 }
             }
 
-            ListenCall<(List<Vector3>, int, bool)>(UICommand.UpdatePos, (param) => 
+            ListenCall<(List<Vector3>, bool)>(UICommand.UpdatePos, (param) => 
             {
                 List<Vector3> posList   = param.Item1;
-                int modelCount          = param.Item2;
-                bool bMirror            = param.Item3;
+                bool bMirror            = param.Item2;
 
                 if (posList == null || width.Equals(0f) || height.Equals(0f))
                 {
@@ -88,28 +87,6 @@ namespace XPlan.ImageRecognize.Demo
                         pointList[i].SetPos(mediapipeXYZ, width, height, bMirror);                        
                     }
                 }
-
-                //for (int i = 0; i < lineList.Count; ++i)
-                //{
-                //    bool b = i < modelCount;
-
-                //    for (int j = 0; j < CommonDefine.Connections.Count; ++j)
-                //    {
-                //        var pair    = CommonDefine.Connections[j];
-                //        int idx1    = pair.Item1 + i * PerPoseMaxPointNum;
-                //        int idx2    = pair.Item2 + i * PerPoseMaxPointNum;
-                //        UILine line = lineList[j + i * CommonDefine.Connections.Count];
-
-                //        if(b)
-                //        {
-                //            line.start      = pointList[idx1].Vec2D;
-                //            line.end        = pointList[idx2].Vec2D;
-                //            line.thickness  = 3f;
-                //        }
-
-                //        line.SetEnable(b);
-                //    }
-                //}
             });
         }
 

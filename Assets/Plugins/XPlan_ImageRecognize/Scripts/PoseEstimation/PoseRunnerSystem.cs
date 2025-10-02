@@ -15,6 +15,7 @@ namespace XPlan.ImageRecognize
         [SerializeField] private float minPoseDetectionConfidence   = 0.5f;
         [SerializeField] private float minPosePresenceConfidence    = 0.5f;
         [SerializeField] private float minTrackingConfidence        = 0.5f;
+        [SerializeField] private int numShowPose                    = 1;
 
         protected override void OnPreInitial()
         {
@@ -35,7 +36,7 @@ namespace XPlan.ImageRecognize
 
         protected override void OnInitialLogic()
         {
-            RegisterLogic(new PoseEstimationAdapter(poseRunner, bMirror));
+            RegisterLogic(new PoseEstimationAdapter(poseRunner, numShowPose, bMirror));
         }
     }
 }
