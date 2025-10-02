@@ -71,33 +71,7 @@ namespace XPlan.ImageRecognize
 
             if (currPoseCount > 1)
             {
-                float sqrThreshold = Mathf.Pow(0.05f, 2f);            // 可依實測調整
-                List<int> delIdxList = new List<int>();
-
-                for (int i = 0; i < poseList.Count - 1; ++i)
-                {
-                    for (int j = i + 1; j < poseList.Count; ++j)
-                    {
-                        Vector3 hipCenter1 = poseList[i].GetHipCenter();
-                        Vector3 hipCenter2 = poseList[j].GetHipCenter();
-
-                        float hipSqr = (hipCenter1 - hipCenter2).sqrMagnitude;
-                        if (hipSqr <= sqrThreshold)
-                        {
-                            delIdxList.AddUnique(j);
-                        }
-                    }
-                }
-
-                if (delIdxList.Count > 0)
-                {
-                    for (int k = delIdxList.Count - 1; k >= 0; --k)
-                    {
-                        poseList[delIdxList[k]].ClearLandmarks();
-                    }
-                }
-
-                currPoseCount -= delIdxList.Count;
+                FilterTooNearPose(ref poseList, ref currPoseCount);                
             }
 
             /*************************************************************
@@ -107,33 +81,14 @@ namespace XPlan.ImageRecognize
 
             if (currPoseCount > numShowPose)
             {
-                List<(int, float)> disSqrList = new List<(int, float)>();
-
-                for (int i = 0; i < poseList.Count; ++i)
-                {
-                    disSqrList.Add((i, poseList[i].DisSqrToScreenCenter(false)));
-                }
-
-                disSqrList.Sort((x1, x2) =>
-                {
-                    return x1.Item2.CompareTo(x2.Item2);
-                });
-
-                // 取前 numShowPose
-                for (int i = 0; i < disSqrList.Count; ++i)
-                {
-                    int idx = disSqrList[i].Item1;
-
-                    // 把過遠的資料移除
-                    if (i >= numShowPose)
-                    {
-                        poseList[idx].ClearLandmarks();
-                    }
-                }
+                KeepClosestToCenter(ref poseList);
             }
 
             Debug.Log($"Before Near Filter: {nearestPoseCount}, Before Num Filter: {limitCount}, Pose Count: {Mathf.Min(limitCount, numShowPose)}");
 
+            /*************************************************************
+             * 將pose資料送出
+             * **********************************************************/
             List<Vector3> posList = new List<Vector3>();
 
             for (int i = 0; i < poseList.Count; ++i)
@@ -164,6 +119,64 @@ namespace XPlan.ImageRecognize
         //    }
 
         //    SendGlobalMsg<PoseWorldLandListMsg>(posLost, bMirror);
+        }
+
+        private void FilterTooNearPose(ref List<PoseLankInfo> poseList, ref int currPoseCount)
+        {
+            float sqrThreshold      = Mathf.Pow(0.05f, 2f);            // 可依實測調整
+            List<int> delIdxList    = new List<int>();
+
+            for (int i = 0; i < poseList.Count - 1; ++i)
+            {
+                for (int j = i + 1; j < poseList.Count; ++j)
+                {
+                    Vector3 hipCenter1 = poseList[i].GetHipCenter();
+                    Vector3 hipCenter2 = poseList[j].GetHipCenter();
+
+                    float hipSqr = (hipCenter1 - hipCenter2).sqrMagnitude;
+                    if (hipSqr <= sqrThreshold)
+                    {
+                        delIdxList.AddUnique(j);
+                    }
+                }
+            }
+
+            if (delIdxList.Count > 0)
+            {
+                for (int k = delIdxList.Count - 1; k >= 0; --k)
+                {
+                    poseList[delIdxList[k]].ClearLandmarks();
+                }
+            }
+
+            currPoseCount -= delIdxList.Count;
+        }
+
+        private void KeepClosestToCenter(ref List<PoseLankInfo> poseList)
+        {
+            List<(int, float)> disSqrList = new List<(int, float)>();
+
+            for (int i = 0; i < poseList.Count; ++i)
+            {
+                disSqrList.Add((i, poseList[i].DisSqrToScreenCenter(false)));
+            }
+
+            disSqrList.Sort((x1, x2) =>
+            {
+                return x1.Item2.CompareTo(x2.Item2);
+            });
+
+            // 取前 numShowPose
+            for (int i = 0; i < disSqrList.Count; ++i)
+            {
+                int idx = disSqrList[i].Item1;
+
+                // 把過遠的資料移除
+                if (i >= numShowPose)
+                {
+                    poseList[idx].ClearLandmarks();
+                }
+            }
         }
     }
 }
