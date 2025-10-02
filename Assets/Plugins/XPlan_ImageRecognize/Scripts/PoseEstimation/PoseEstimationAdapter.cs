@@ -49,7 +49,7 @@ namespace XPlan.ImageRecognize
 
                 if (b)
                 {
-                    poseList[i].SetLandmarks(poseLandmarksList[i].landmarks, false);
+                    poseList[i].AddFrameLandmarks(poseLandmarksList[i].landmarks, false);
                 }
                 else
                 {
