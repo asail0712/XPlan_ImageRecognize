@@ -19,14 +19,14 @@ namespace XPlan.ImageRecognize
         /// 平滑強度 (0~1)。愈大代表愈貼近當前幀（更靈敏、較少延遲）
         /// 建議 0.4~0.8 之間，預設 0.6
         /// </summary>
-        private float SmoothAlpha { get; set; } = 0.4f;
+        public float SmoothAlpha { get; set; } = 0.4f;
 
         /// <summary>
         /// 瞬切門檻（以「歸一化座標」長度衡量，0~sqrt(2)）
         /// 典型人體點位在 0~1 空間中移動，0.12~0.2 通常表現不錯。
         /// </summary>
-        private const float snapDistance    = 0.15f;
-        private const float snapDistSqr     = snapDistance * snapDistance;
+        public float snapDistance       = 0.15f;
+        private float snapDistSqr       = 0f;
 
         public PoseLankInfo() 
         {
@@ -35,6 +35,7 @@ namespace XPlan.ImageRecognize
             bHasPrev        = false;
 
             SmoothAlpha     = Mathf.Clamp01(SmoothAlpha);
+            snapDistSqr     = snapDistance * snapDistance;
         }
 
         public void AddFrameLandmarks(List<NormalizedLandmark> landmarkList, bool bVisualZ)

@@ -233,7 +233,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   poseRunner: {fileID: 15570674}
-  runningMode: 1
+  runningMode: 0
   modelType: 1
   maxNumOfPose: 3
   bMirror: 0
@@ -241,6 +241,8 @@ MonoBehaviour:
   minPosePresenceConfidence: 0.8
   minTrackingConfidence: 0.8
   numShowPose: 1
+  ptSmoothAlpha: 0.35
+  ptSnapDistance: 0.1
 --- !u!114 &15570674
 MonoBehaviour:
   m_ObjectHideFlags: 0

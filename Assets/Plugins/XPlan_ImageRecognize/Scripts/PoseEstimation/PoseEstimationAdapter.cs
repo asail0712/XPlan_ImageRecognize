@@ -1,9 +1,11 @@
+using Mediapipe;
 using Mediapipe.Tasks.Components.Containers;
 using System.Collections.Generic;
 
 using UnityEngine;
 using XPlan.Utility;
-//using NormalizedLandmark = Mediapipe.Tasks.Components.Containers.NormalizedLandmark;
+
+using Landmark = Mediapipe.Landmark;
 
 namespace XPlan.ImageRecognize
 {
@@ -13,7 +15,9 @@ namespace XPlan.ImageRecognize
         private List<PoseLankInfo> poseList;
         private int numShowPose;
 
-        public PoseEstimationAdapter(PoseEstimationRunner poseRunner, int numShowPose, bool bMirror)
+        private List<Landmarks> reservePoseWorldLandmarkList;
+
+        public PoseEstimationAdapter(PoseEstimationRunner poseRunner, int numShowPose, bool bMirror, float ptSmoothAlpha, float ptSnapDistance)
         {            
             this.bMirror        = bMirror;
             this.poseList       = new List<PoseLankInfo>();
@@ -21,7 +25,11 @@ namespace XPlan.ImageRecognize
 
             for (int i = 0; i < poseRunner.config.NumPoses; ++i)
             {
-                poseList.Add(new PoseLankInfo());
+                poseList.Add(new PoseLankInfo() 
+                {
+                    SmoothAlpha     = ptSmoothAlpha,
+                    snapDistance    = ptSnapDistance,
+                });
             }
 
             poseRunner.imgInitFinish += (imgSource) => 
@@ -77,14 +85,10 @@ namespace XPlan.ImageRecognize
             /*************************************************************
              * 依照 numShowPose 決定顯示幾個Pose (以靠近中間為主)
              * **********************************************************/
-            int limitCount = currPoseCount;
+            int limitCount  = currPoseCount;
+            int closestIdx  = KeepClosestToCenter(ref poseList);
 
-            if (currPoseCount > numShowPose)
-            {
-                KeepClosestToCenter(ref poseList);
-            }
-
-            Debug.Log($"Before Near Filter: {nearestPoseCount}, Before Num Filter: {limitCount}, Pose Count: {Mathf.Min(limitCount, numShowPose)}");
+            Debug.Log($"Before Near Filter: {nearestPoseCount}, Before Num Filter: {limitCount}, Pose Count: {Mathf.Min(limitCount, numShowPose)}, Closest Index: {closestIdx}");
 
             /*************************************************************
              * 將pose資料送出
@@ -101,24 +105,31 @@ namespace XPlan.ImageRecognize
 
         private void ProcessPoseWorldLandmark(List<Landmarks> poseWorldLandmarkList)
         {
-        //    //new MediapipeLandmarkListMsg(poseWorldLandmarkList, bMirror);
+            reservePoseWorldLandmarkList = poseWorldLandmarkList;
 
-        //    if (poseWorldLandmarkList == null)
-        //    {
-        //        SendGlobalMsg<PoseWorldLandListMsg>(new List<Vector3>(), bMirror);
-        //        return;
-        //    }
+            //List<Landmark> landmarks = poseWorldLandmarkList[0].landmarks;
 
-        //    List<Vector3> posLost = new List<Vector3>();
-        //    IReadOnlyList<Landmark> landmarkList = poseWorldLandmarkList.landmarks;
+            //LandmarkList landmarkList = new LandmarkList();
+            //landmarkList.Landmark.AddRange(landmarks);
+            
+            //new MediapipeLandmarkListMsg(landmarkList, bMirror);
 
-        //    for (int i = 0; i < poseWorldLandmarkList.Count; ++i)
-        //    {
-        //        Vector3 p = new Vector3(poseWorldLandmarkList[i].X, poseWorldLandmarkList[i].Y, poseWorldLandmarkList[i].Z);
-        //        posLost.Add(p);
-        //    }
+            //    if (poseWorldLandmarkList == null)
+            //    {
+            //        SendGlobalMsg<PoseWorldLandListMsg>(new List<Vector3>(), bMirror);
+            //        return;
+            //    }
 
-        //    SendGlobalMsg<PoseWorldLandListMsg>(posLost, bMirror);
+            //    List<Vector3> posLost = new List<Vector3>();
+            //    IReadOnlyList<Landmark> landmarkList = poseWorldLandmarkList.landmarks;
+
+            //    for (int i = 0; i < poseWorldLandmarkList.Count; ++i)
+            //    {
+            //        Vector3 p = new Vector3(poseWorldLandmarkList[i].X, poseWorldLandmarkList[i].Y, poseWorldLandmarkList[i].Z);
+            //        posLost.Add(p);
+            //    }
+
+            //    SendGlobalMsg<PoseWorldLandListMsg>(posLost, bMirror);
         }
 
         private void FilterTooNearPose(ref List<PoseLankInfo> poseList, ref int currPoseCount)
@@ -152,12 +163,13 @@ namespace XPlan.ImageRecognize
             currPoseCount -= delIdxList.Count;
         }
 
-        private void KeepClosestToCenter(ref List<PoseLankInfo> poseList)
+        private int KeepClosestToCenter(ref List<PoseLankInfo> poseList)
         {
             List<(int, float)> disSqrList = new List<(int, float)>();
 
             for (int i = 0; i < poseList.Count; ++i)
             {
+                // 為了判斷離中間的距離
                 disSqrList.Add((i, poseList[i].DisSqrToScreenCenter(false)));
             }
 
@@ -176,6 +188,16 @@ namespace XPlan.ImageRecognize
                 {
                     poseList[idx].ClearLandmarks();
                 }
+            }
+
+            // 回傳最靠近螢幕中間的index
+            if(disSqrList.Count == 0)
+            {
+                return -1;
+            }
+            else
+            {
+                return disSqrList[0].Item1;
             }
         }
     }
