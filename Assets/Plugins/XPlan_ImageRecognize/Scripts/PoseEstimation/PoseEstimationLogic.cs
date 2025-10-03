@@ -39,10 +39,10 @@ namespace XPlan.ImageRecognize
 
     public class MediapipeLandmarkListMsg : MessageBase
     {
-        public LandmarkList landmarkList;
+        public List<Landmark> landmarkList;
         public bool bIsMirror;
 
-        public MediapipeLandmarkListMsg(LandmarkList landmarkList, bool bIsMirror)
+        public MediapipeLandmarkListMsg(List<Landmark> landmarkList, bool bIsMirror)
         {
             this.landmarkList   = landmarkList;
             this.bIsMirror      = bIsMirror;
@@ -203,7 +203,7 @@ namespace XPlan.ImageRecognize
 
         private void ProcessPoseWorldLandmark(LandmarkList poseWorldLandmarkList)
         {
-            new MediapipeLandmarkListMsg(poseWorldLandmarkList, bMirror);
+            //new MediapipeLandmarkListMsg(poseWorldLandmarkList.Landmark, bMirror);
 
             if (poseWorldLandmarkList == null)
             {

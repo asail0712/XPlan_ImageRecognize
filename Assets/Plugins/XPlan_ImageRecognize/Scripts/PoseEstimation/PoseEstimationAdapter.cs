@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using XPlan.Utility;
 
-using Landmark = Mediapipe.Landmark;
+using Landmark = Mediapipe.Tasks.Components.Containers.Landmark;
 
 namespace XPlan.ImageRecognize
 {
@@ -91,7 +91,7 @@ namespace XPlan.ImageRecognize
             Debug.Log($"Before Near Filter: {nearestPoseCount}, Before Num Filter: {limitCount}, Pose Count: {Mathf.Min(limitCount, numShowPose)}, Closest Index: {closestIdx}");
 
             /*************************************************************
-             * 將pose資料送出
+             * 將 pose 2D 資料送出
              * **********************************************************/
             List<Vector3> posList = new List<Vector3>();
 
@@ -101,18 +101,21 @@ namespace XPlan.ImageRecognize
             }
 
             SendGlobalMsg<PoseLandListMsg>(posList, bMirror);
+
+            /*************************************************************
+             * 將 pose 3D 資料送出
+             * **********************************************************/
+            if(reservePoseWorldLandmarkList.IsValidIndex(closestIdx))
+            {
+                List<Landmark> landmarks = reservePoseWorldLandmarkList[closestIdx].landmarks;
+
+                new MediapipeLandmarkListMsg(landmarks.ToMpLandmarkList(), bMirror);
+            }
         }
 
         private void ProcessPoseWorldLandmark(List<Landmarks> poseWorldLandmarkList)
         {
             reservePoseWorldLandmarkList = poseWorldLandmarkList;
-
-            //List<Landmark> landmarks = poseWorldLandmarkList[0].landmarks;
-
-            //LandmarkList landmarkList = new LandmarkList();
-            //landmarkList.Landmark.AddRange(landmarks);
-            
-            //new MediapipeLandmarkListMsg(landmarkList, bMirror);
 
             //    if (poseWorldLandmarkList == null)
             //    {

@@ -12,7 +12,7 @@ namespace XPlan.ImageRecognize.Demo
     {
         [SerializeField] private PoseWorldLandmarkListAnnotationController annotationController;
 
-        private LandmarkList landmarkList;
+        private List<Mediapipe.Landmark> landmarkList;
 
         public Func<string> GetLazyZoneID { get; set; } = () => "";
 
@@ -35,7 +35,7 @@ namespace XPlan.ImageRecognize.Demo
                 return;
             }
 
-            annotationController.DrawNow(landmarkList);
+            annotationController.DrawLater(landmarkList);
         }
     }
 }
