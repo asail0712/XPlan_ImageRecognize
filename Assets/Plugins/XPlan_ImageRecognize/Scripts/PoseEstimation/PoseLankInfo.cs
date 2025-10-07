@@ -38,7 +38,7 @@ namespace XPlan.ImageRecognize
             snapDistSqr     = snapDistance * snapDistance;
         }
 
-        public void AddFrameLandmarks(List<NormalizedLandmark> landmarkList, bool bVisualZ)
+        public void AddFrameLandmarks(List<NormalizedLandmark> landmarkList)
         {
             // 先將這一幀的 raw 轉成 Vector3
             int n = landmarkList?.Count ?? 0;
@@ -59,7 +59,7 @@ namespace XPlan.ImageRecognize
                 for (int i = 0; i < n; ++i)
                 {
                     var lmk         = landmarkList[i];
-                    var raw         = new Vector3(lmk.x, lmk.y, bVisualZ ? lmk.z : 0f);
+                    var raw         = new Vector3(lmk.x, lmk.y, 0f);
                     prevSmoothed[i] = raw;
                     posePtList[i]   = raw;
                 }
@@ -70,21 +70,70 @@ namespace XPlan.ImageRecognize
             for (int i = 0; i < n; ++i)
             {
                 var lmk     = landmarkList[i];
-                var raw     = new Vector3(lmk.x, lmk.y, bVisualZ ? lmk.z : 0f);
+                var raw     = new Vector3(lmk.x, lmk.y, 0f);
                 var prev    = prevSmoothed[i];
 
-                // 判斷距離（2D 或 3D）
-                float distSqr;
-                if (bVisualZ)
+                // 判斷距離
+                Vector2 raw2    = new Vector2(raw.x, raw.y);
+                Vector2 prev2   = new Vector2(prev.x, prev.y);
+                float distSqr   = (raw2 - prev2).sqrMagnitude;
+
+                Vector3 smoothed;
+                if (distSqr > snapDistSqr)
                 {
-                    distSqr = (raw - prev).sqrMagnitude;
+                    // 大位移：瞬切過去，視為換目標
+                    smoothed = raw;
                 }
                 else
                 {
-                    Vector2 raw2    = new Vector2(raw.x, raw.y);
-                    Vector2 prev2   = new Vector2(prev.x, prev.y);
-                    distSqr         = (raw2 - prev2).sqrMagnitude;
+                    // 正常微動：指數平滑
+                    smoothed = Vector3.Lerp(prev, raw, SmoothAlpha);
                 }
+
+                prevSmoothed[i] = smoothed;
+                posePtList[i]   = smoothed;
+            }
+        }
+
+        public void AddFrameLandmarks(List<Landmark> landmarkList)
+        {
+            // 先將這一幀的 raw 轉成 Vector3
+            int n = landmarkList?.Count ?? 0;
+            if (n == 0)
+            {
+                posePtList.Clear();
+                // 不清 prev，因為可能只是短暫偵測不到
+                return;
+            }
+
+            // 確保容器長度
+            EnsureSize(posePtList, n);
+            EnsureSize(prevSmoothed, n);
+
+            // 第一次：直接吃 raw 當作起點
+            if (!bHasPrev)
+            {
+                for (int i = 0; i < n; ++i)
+                {
+                    var lmk         = landmarkList[i];
+                    var raw         = new Vector3(lmk.x, lmk.y, lmk.z);
+                    prevSmoothed[i] = raw;
+                    posePtList[i]   = raw;
+                }
+                bHasPrev = true;
+                return;
+            }
+
+            for (int i = 0; i < n; ++i)
+            {
+                var lmk     = landmarkList[i];
+                var raw     = new Vector3(lmk.x, lmk.y, lmk.z);
+                var prev    = prevSmoothed[i];
+
+                // 判斷距離
+                Vector3 raw2    = new Vector3(raw.x, raw.y, raw.z);
+                Vector3 prev2   = new Vector3(prev.x, prev.y, prev.z);
+                float distSqr   = (raw2 - prev2).sqrMagnitude;
 
                 Vector3 smoothed;
                 if (distSqr > snapDistSqr)
@@ -157,6 +206,11 @@ namespace XPlan.ImageRecognize
             {
                 return (new Vector2(center.x, center.y) - new Vector2(0.5f, 0.5f)).sqrMagnitude;
             }
+        }
+
+        public bool HasPose()
+        {
+            return posePtList.Count > 0;
         }
 
         private static void EnsureSize(List<Vector3> list, int size)

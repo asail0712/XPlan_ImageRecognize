@@ -241,7 +241,7 @@ MonoBehaviour:
   minPosePresenceConfidence: 0.8
   minTrackingConfidence: 0.8
   numShowPose: 1
-  ptSmoothAlpha: 0.35
+  ptSmoothAlpha: 0.3
   ptSnapDistance: 0.1
 --- !u!114 &15570674
 MonoBehaviour:
