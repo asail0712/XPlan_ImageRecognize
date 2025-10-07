@@ -1,11 +1,11 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace XPlan
-{ 
+{
     public static class XPlanCommon
     {
-        public const string Version = "2.1.3";
+        public const string Version = "2.3.8";
     }
 }

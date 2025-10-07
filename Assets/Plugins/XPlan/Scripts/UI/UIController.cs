@@ -50,6 +50,18 @@ namespace XPlan.UI
 		[SerializeField]
 		public TextAsset[] csvAssetList;
 
+		public int CurrLanguage
+		{
+			get
+			{
+				return stringTable.CurrLanguage;
+			}
+			set
+			{
+				stringTable.CurrLanguage = value;
+			}
+		}
+
 		private List<UIVisibleInfo> currVisibleList		= new List<UIVisibleInfo>();
 		private List<UIVisibleInfo> persistentUIList	= new List<UIVisibleInfo>();
 		private List<UILoader> loaderStack				= new List<UILoader>();
@@ -57,7 +69,39 @@ namespace XPlan.UI
 
 		protected override void InitSingleton()
 		{
+			// 設定多語言字串表
 			stringTable.InitialStringTable(csvAssetList);
+
+			// 初始化靜態UI
+			InitialStaticUI();
+		}
+
+		/**************************************
+		 * 靜態UI處理
+		 * ************************************/
+		private void InitialStaticUI()
+		{
+			List<GameObject> uiGOList	= new List<GameObject>();
+			List<UIBase> uiList			= new List<UIBase>();
+
+			foreach (GameObject uiRoot in uiRootList)
+			{
+				uiList.AddRange(uiRoot.GetComponentsInChildren<UIBase>().ToList());
+			}
+
+			// 初始化
+			foreach (UIBase ui in uiList)
+			{
+				uiGOList.AddUnique<GameObject>(ui.gameObject);
+
+				ui.InitialUI(-1);
+			}
+
+			// 設定字表
+			foreach (GameObject ui in uiGOList)
+			{
+				stringTable.InitialUIText(ui);
+			}
 		}
 
 		/**************************************
@@ -108,17 +152,13 @@ namespace XPlan.UI
 					// 生成UI
 					uiIns = GameObject.Instantiate(loadingInfo.uiPerfab, uiRootList[loadingInfo.rootIdx].transform);
 
-					// 強制enable 去觸發 Awake，來註冊Command
-					uiIns.SetActive(true);
-					uiIns.transform.localScale = Vector3.zero;
-
 					// 加上文字
 					stringTable.InitialUIText(uiIns);
 
 					// 初始化所有的 ui base
 					UIBase[] newUIList = uiIns.GetComponents<UIBase>();
 
-					if (newUIList == null || newUIList.Length == 9)
+					if (newUIList == null)
 					{
 						LogSystem.Record("uiBase is null !", LogType.Error);
 
@@ -154,8 +194,15 @@ namespace XPlan.UI
 					}
 				}
 
-				StartCoroutine(UIVisibleSetting(uiIns, loadingInfo.bVisible));
-			}
+				// 設定UI Visible
+				if (uiIns != null)
+				{
+					uiIns.SetActive(loadingInfo.bVisible);
+					uiIns.transform.localScale = Vector3.one;
+				}
+
+				loader.IsDone = true;
+            }
 
 			/********************************
 			 * 判斷是否有UI需要移除
@@ -213,21 +260,6 @@ namespace XPlan.UI
 			}
 
 			loaderStack.Add(loader);			
-		}
-
-		private IEnumerator UIVisibleSetting(GameObject uiIns, bool bVisible)
-		{
-			yield return new WaitForEndOfFrame();
-			
-			/********************************
-			* 設定UI Visible
-			* *****************************/			
-			
-			if (uiIns != null)
-			{
-				uiIns.SetActive(bVisible);
-				uiIns.transform.localScale = Vector3.one;
-			}
 		}
 
 		public void UnloadingUI(UILoader loader)
@@ -365,9 +397,31 @@ namespace XPlan.UI
 		/**************************************
 		 * String Table
 		 * ************************************/
-		public string GetStr(string keyStr, bool bShowWarning = false)
+		public string GetStr(string keyStr)
 		{
-			return stringTable.GetStr(keyStr, bShowWarning);
+			return stringTable.GetStr(keyStr);
+		}
+
+		public string ReplaceStr(string keyStr, params string[] paramList)
+		{
+			return stringTable.ReplaceStr(keyStr, paramList);
+		}
+
+		public List<GameObject> GetAllVisibleUI()
+		{
+			List<GameObject> result = new List<GameObject>();
+
+			foreach (UIVisibleInfo info in currVisibleList)
+			{
+				result.Add(info.uiIns);
+			}
+
+			foreach (UIVisibleInfo info in persistentUIList)
+			{
+				result.Add(info.uiIns);
+			}
+
+			return result;
 		}
 	}
 }

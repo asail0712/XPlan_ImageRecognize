@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using XPlan.Interface;
+using XPlan.Utility;
 
 namespace XPlan.UI.Component
 {
@@ -49,7 +50,17 @@ namespace XPlan.UI.Component
 		 * **************************************/
 		public void Refresh()
 		{
+			bBeChoosed = itemInfo.IsChoose();
+
 			OnRefresh(itemInfo);
+		}
+
+		/********************************
+		 * 其他
+		 * *****************************/
+		protected string GetStr(string keyStr)
+		{
+			return UIController.Instance.GetStr(keyStr);
 		}
 
 		/*****************************************
@@ -77,6 +88,18 @@ namespace XPlan.UI.Component
 
 		private TableItem tableItem;
 
+		private bool bBeChoose = false;
+
+		public TableItemInfo()
+        {
+
+        }
+
+		public TableItemInfo(string uniqueID)
+        {
+			this.uniqueID = uniqueID;
+        }
+
 		public void SetItem(TableItem item)
 		{
 			tableItem = item;
@@ -89,7 +112,13 @@ namespace XPlan.UI.Component
 
 		public void SetChoose(bool b)
 		{
-			tableItem.SetChoose(b);
+			bBeChoose = b;
+		}
+
+		public bool IsChoose()
+        {
+			return bBeChoose;
+
 		}
 	}
 
@@ -217,7 +246,7 @@ namespace XPlan.UI.Component
 			gridLayoutGroup.childAlignment = anchor;
 		}
 
-		public void Refresh(bool bRefreshAnchorSize = true, bool bRefreshAnchorPos = false)
+		public void Refresh(bool bRefreshAnchorSize = true, bool bRefreshScrollPosition = true)//, bool bRefreshAnchorPos = true)
 		{
 			/**********************************
 			 * 依照Page來決定設定進Item的資料
@@ -275,46 +304,75 @@ namespace XPlan.UI.Component
 			}
 
 			/**********************************
-			 * 刷新content大小
+			 * 刷新content
 			 * *******************************/
-			if(bRefreshAnchorSize)
+			if (bRefreshAnchorSize)
+            {
+                ContentSizeFitter fitter	= anchor.AddOrFindComponent<ContentSizeFitter>();
+                fitter.verticalFit			= ContentSizeFitter.FitMode.PreferredSize;
+				fitter.horizontalFit		= ContentSizeFitter.FitMode.PreferredSize;
+            }
+
+
+			/**********************************
+			 * 刷新Scroll
+			 * *******************************/
+			if(!bRefreshScrollPosition)
+            {
+				return;
+            }
+
+			RefreshScroll();
+
+			//         if (bRefreshAnchorPos)
+			//{
+			//	RectTransform rectTF = (RectTransform)anchor.transform;
+
+			//	if (gridLayoutGroup.startAxis == GridLayoutGroup.Axis.Horizontal)
+			//	{
+			//		rectTF.localPosition = new Vector3(rectTF.localPosition.x, 0f, rectTF.localPosition.z);
+			//	}
+			//	else
+			//	{
+			//		rectTF.localPosition = new Vector3(0f, rectTF.localPosition.y, rectTF.localPosition.z);
+			//	}
+			//}
+		}
+
+		private void RefreshScroll()
+        {
+			if (anchor != null)
 			{
-				int currCol		= 1;
-				int currRow		= 1;
-				int infoCount	= itemInfoList.Count;
+				Transform parent = anchor.transform.parent;
+
+				if (parent == null)
+				{
+					return;
+				}
+
+				Transform grandParent = parent.parent;
+
+				if (grandParent == null)
+				{
+					return;
+				}
+
+				ScrollRect scrollRect = grandParent.gameObject.GetComponent<ScrollRect>();
+
+				if (scrollRect == null)
+				{
+					return;
+				}
 
 				if (gridLayoutGroup.startAxis == GridLayoutGroup.Axis.Horizontal)
 				{
-					currCol = Mathf.Min(infoCount, col);
-					currRow = Mathf.CeilToInt((float)infoCount / (float)col);
-					currRow = Mathf.Min(infoCount, row);
+					// scroll移到最上面
+					scrollRect.verticalNormalizedPosition = 1f;
 				}
 				else
-				{
-					currRow = Mathf.Min(infoCount, row);
-					currCol = Mathf.CeilToInt((float)infoCount / (float)row);
-					currCol = Mathf.Min(infoCount, col);
-				}
-
-				float spaceX = gridLayoutGroup.spacing.x;
-				float spaceY = gridLayoutGroup.spacing.y;
-
-				RectTransform rectTF	= (RectTransform)anchor.transform;
-				rectTF.sizeDelta		= new Vector2(currCol * gridLayoutGroup.cellSize.x + (currCol - 1) * spaceX,
-														currRow * gridLayoutGroup.cellSize.y + (currRow - 1) * spaceY);
-			}
-
-			if(bRefreshAnchorPos)
-			{
-				RectTransform rectTF = (RectTransform)anchor.transform;
-
-				if (gridLayoutGroup.startAxis == GridLayoutGroup.Axis.Horizontal)
-				{
-					rectTF.localPosition = new Vector3(rectTF.localPosition.x, 0f, rectTF.localPosition.z);
-				}
-				else
-				{
-					rectTF.localPosition = new Vector3(0f, rectTF.localPosition.y, rectTF.localPosition.z);
+                {
+					// scroll移到最左邊
+					scrollRect.horizontalNormalizedPosition = 1f;
 				}
 			}
 		}

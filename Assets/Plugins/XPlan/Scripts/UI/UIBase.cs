@@ -1,13 +1,16 @@
 ﻿using TMPro;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 
 using XPlan.Interface;
 using XPlan.Scenes;
-using XPlan.UI.Component;
+using XPlan.UI.Fade;
+using XPlan.Utility;
 
 namespace XPlan.UI
 {
@@ -24,23 +27,20 @@ namespace XPlan.UI
 
 	public class UIBase : MonoBehaviour, IUIListener
 	{
-		// 判斷是否由UILoader仔入
-		private bool bSpawnByLoader = false;
-
-		/********************************
+        /********************************
 		* Listen Handler Call
 		* *****************************/
-		public void ListenCall(string id, ListenOption option, Action<UIParam[]> paramAction)
+        private void Awake()
+        {
+		}
+
+        /********************************
+		* Listen Handler Call
+		* *****************************/
+        public void ListenCall(string id, ListenOption option, Action<UIParam[]> paramAction)
 		{
 			UISystem.ListenCall(id, this, option, (paramList) =>
 			{
-				if (bSpawnByLoader &&
-					UIController.IsInstance()
-					&& !UIController.Instance.IsWorkingUI(this))
-				{
-					return;
-				}
-
 				paramAction?.Invoke(paramList);
 			});
 		}
@@ -49,13 +49,6 @@ namespace XPlan.UI
 		{
 			UISystem.ListenCall(id, this, option, (paramList) =>
 			{
-				if (bSpawnByLoader &&
-					UIController.IsInstance()
-					&& !UIController.Instance.IsWorkingUI(this))
-				{
-					return;
-				}
-
 				paramAction?.Invoke(paramList[0].GetValue<T>());
 			});
 		}
@@ -64,13 +57,6 @@ namespace XPlan.UI
 		{
 			UISystem.ListenCall(id, this, option, (paramList) =>
 			{
-				if (bSpawnByLoader &&
-					UIController.IsInstance()
-					&& !UIController.Instance.IsWorkingUI(this))
-				{
-					return;
-				}
-
 				noParamAction?.Invoke();
 			});
 		}
@@ -128,11 +114,37 @@ namespace XPlan.UI
 		{
 			inputTxt.onValueChanged.AddListener((str) =>
 			{
-				DirectTrigger<string>(uniqueID, str, onPress);
+                DirectTrigger<string>(uniqueID, str, onPress);
 			});
 		}
 
-		protected void RegisterSlider(string uniqueID, Slider slider, Action<float> onPress = null)
+        protected void RegisterTextSubmit(string uniqueID, TMP_InputField inputTxt, Action<string> onPress = null, bool bClearWhenPress = true)
+        {
+            inputTxt.onSubmit.AddListener((str) =>
+            {
+                if (bClearWhenPress)
+                {
+                    inputTxt.text = "";
+                }
+
+                DirectTrigger<string>(uniqueID, str, onPress);
+            });
+        }
+
+        protected void RegisterTextSubmit(string uniqueID, InputField inputTxt, Action<string> onPress = null, bool bClearWhenPress = true)
+        {
+            inputTxt.onSubmit.AddListener((str) =>
+            {
+                if (bClearWhenPress)
+                {
+                    inputTxt.text = "";
+                }
+
+                DirectTrigger<string>(uniqueID, str, onPress);
+            });
+        }
+
+        protected void RegisterSlider(string uniqueID, Slider slider, Action<float> onPress = null)
 		{
 			slider.onValueChanged.AddListener((value) =>
 			{
@@ -308,19 +320,197 @@ namespace XPlan.UI
 
 		public void InitialUI(int idx)
 		{
-			this.sortIdx		= idx;
-			this.bSpawnByLoader = true;
-
+			this.sortIdx = idx;
 			OnInitialUI();
 		}
+
 		public int SortIdx { get => sortIdx; set => sortIdx = value; }
-		
+
 		/********************************
 		 * 其他
 		 * *****************************/
-		public string GetStr(string keyStr, bool bShowWarning = false)
+		protected string GetStr(string keyStr)
 		{
-			return UIController.Instance.GetStr(keyStr, bShowWarning);
+			return UIController.Instance.GetStr(keyStr);
+		}
+
+        protected string ReplaceStr(string keyStr, params string[] paramList)
+        {
+            return UIController.Instance.ReplaceStr(keyStr, paramList);
+        }
+
+        protected void DefaultToggleBtns(Button[] btns)
+        {
+			for(int i = 0; i < btns.Length; ++i)
+            {
+				btns[i].gameObject.SetActive(i == 0);
+            }
+        }
+
+		/********************************
+		 * 工具
+		 * *****************************/
+		public void LoadImageFromUrl(RawImage targetImage, string url)
+		{
+			if (string.IsNullOrEmpty(url))
+			{
+				LogSystem.Record("避免使用空字串下載圖片", LogType.Warning);
+
+				return;
+			}
+
+			MonoBehaviourHelper.StartCoroutine(LoadImageFromUrl_Internal(url, (texture) => 
+			{
+				targetImage.texture = texture;
+			}));
+		}
+
+		public void LoadImageFromUrl(Image targetImage, string url, bool bResize = true)
+		{
+			if (string.IsNullOrEmpty(url))
+			{
+				LogSystem.Record("避免使用空字串下載圖片", LogType.Warning);
+
+				return;
+			}
+
+			MonoBehaviourHelper.StartCoroutine(LoadImageFromUrl_Internal(url, (texture) => 
+			{
+				Sprite sprite = Sprite.Create(
+									texture,
+									new Rect(0, 0, texture.width, texture.height),
+									new Vector2(0.5f, 0.5f));
+
+				targetImage.sprite = sprite;
+
+				if (bResize)
+				{
+					// 自動調整 Image 尺寸符合原始圖片
+					RectTransform rt = targetImage.GetComponent<RectTransform>();
+					if (rt != null)
+					{
+						rt.sizeDelta = new Vector2(texture.width, texture.height);
+					}
+				}
+			}));
+		}
+
+		private IEnumerator LoadImageFromUrl_Internal(string url, Action<Texture2D> finishAction)
+		{
+			UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
+			Texture2D texture		= null;
+
+			yield return request.SendWebRequest();
+
+#if UNITY_2020_1_OR_NEWER
+			if (request.result != UnityWebRequest.Result.Success)
+#else
+            if (request.isNetworkError || request.isHttpError)
+#endif
+			{
+				LogSystem.Record("載入圖片失敗: " + request.error, LogType.Error);
+
+				texture = null;
+			}
+			else
+			{
+				texture	= DownloadHandlerTexture.GetContent(request);
+			}
+
+			finishAction?.Invoke(texture);
+		}
+
+		public void FadeInOutAlpha(CanvasGroup canvasGroup, float targetAlpha, float duration, Action finishAction = null)
+		{
+			MonoBehaviourHelper.StartCoroutine(FadeInOutAlpha_Internal(canvasGroup, targetAlpha, duration, finishAction));
+		}
+
+		private IEnumerator FadeInOutAlpha_Internal(CanvasGroup canvasGroup, float targetAlpha, float duration, Action finishAction = null)
+		{
+			float elapsedTime	= 0f;
+			float startAlpha	= canvasGroup.alpha;
+
+			while (elapsedTime < duration)
+			{
+				yield return null;
+				elapsedTime			+= Time.deltaTime;
+				float newAlpha		= Mathf.Lerp(startAlpha, targetAlpha, elapsedTime / duration);
+				canvasGroup.alpha	= newAlpha;
+			}
+
+			canvasGroup.alpha		= targetAlpha;
+
+			finishAction?.Invoke();
+		}
+
+		/***************************************
+		 * UI文字調整
+		 * *************************************/
+		public void RefreshText()
+		{
+			Debug.Log("RefreshText");
+
+			OnRefreshText();
+		}
+
+		protected virtual void OnRefreshText()
+		{
+
+		}
+
+		/***************************************
+		 * UI Visible
+		 * *************************************/
+		public void ToggleUI(GameObject ui, bool bEnabled)
+		{
+			// 狀態一致 不需要改變
+			if(ui.activeSelf == bEnabled)
+            {
+				return;
+            }
+
+			FadeBase[] fadeList = ui.GetComponents<FadeBase>();
+
+			if (fadeList == null || fadeList.Length == 0)
+			{
+				ui.SetActive(bEnabled);
+				return;
+			}
+
+			if (bEnabled)
+			{
+				ui.SetActive(true);
+
+				Array.ForEach<FadeBase>(fadeList, (fadeComp) =>
+				{
+					if (fadeComp == null)
+					{
+						return;
+					}
+
+					fadeComp.PleaseStartYourPerformance(true, null);
+				});
+			}
+			else
+			{
+				int finishCounter = 0;
+
+				Array.ForEach<FadeBase>(fadeList, (fadeComp) =>
+				{
+					if (fadeComp == null)
+					{
+						return;
+					}
+
+					fadeComp.PleaseStartYourPerformance(false, () =>
+					{
+						if (++finishCounter == fadeList.Length)
+						{
+							ui.SetActive(false);
+						}
+					});
+				});
+			}
 		}
 	}
 }
