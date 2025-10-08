@@ -15,13 +15,23 @@ namespace XPlan.ImageRecognize.Demo
         {
             RegisterNotify<PoseLandListMsg>((msg) => 
             {
-                DirectCallUI<(List<Vector3>, bool)>(UICommand.UpdatePos, (msg.landmarkList, msg.bIsMirror));
+                DirectCallUI<(List<Vector3>, bool)>(UICommand.UpdatePose, (msg.landmarkList, msg.bIsMirror));
             });
 
             RegisterNotify<PoseWorldLandListMsg>((msg) =>
             {
 
             });
+
+            RegisterNotify<TexturePrepareMsg>((msg) => 
+            {
+                DirectCallUI<ImageSource>(UICommand.InitScreen, (msg.imageSource));
+            });
+
+            RegisterNotify<PoseMaskMsg>((msg) =>
+            {
+                DirectCallUI<Mediapipe.Image>(UICommand.UpdatePoseMask, (msg.maskImg));
+            });         
         }
     }
 }

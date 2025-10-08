@@ -58,10 +58,11 @@ namespace XPlan.ImageRecognize.Demo
 
     public static class UICommand
     {
-        public const string InitScreen  = "InitScreen";
+        public const string InitScreen      = "InitScreen";
 
-        public const string UpdateMask  = "UpdateMask";
-        public const string UpdatePos   = "UpdatePos";
+        public const string UpdateMask      = "UpdateMask";
+        public const string UpdatePose      = "UpdatePose";
+        public const string UpdatePoseMask  = "UpdatePoseMask";
     }
 }
 

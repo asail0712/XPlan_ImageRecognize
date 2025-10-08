@@ -267,6 +267,9 @@ MonoBehaviour:
   pointRoot: {fileID: 8741784333717732323}
   lineRoot: {fileID: 1723616448578911893}
   screen: {fileID: 6768629990437444769}
+  maskShader: {fileID: 4800000, guid: 30ce68fc8909565718481dab17fb62cd, type: 3}
+  maskThreshold: 0.9
+  maskColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!1 &8387510575323380850
 GameObject:
   m_ObjectHideFlags: 0

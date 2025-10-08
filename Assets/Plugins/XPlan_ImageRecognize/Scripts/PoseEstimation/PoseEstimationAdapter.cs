@@ -2,15 +2,65 @@ using Intel.RealSense;
 using Mediapipe;
 using Mediapipe.Tasks.Components.Containers;
 using Mediapipe.Tasks.Vision.PoseLandmarker;
+using Mediapipe.Unity;
 using System.Collections.Generic;
 
 using UnityEngine;
+using XPlan.Observe;
 using XPlan.Utility;
 
 using Landmark = Mediapipe.Tasks.Components.Containers.Landmark;
 
 namespace XPlan.ImageRecognize
 {
+    public class PoseLandListMsg : MessageBase
+    {
+        public List<Vector3> landmarkList;
+        public bool bIsMirror;
+
+        public PoseLandListMsg(List<Vector3> landmarkList, bool bIsMirror)
+        {
+            this.landmarkList   = landmarkList;
+            this.bIsMirror      = bIsMirror;
+        }
+    }
+
+    public class PoseWorldLandListMsg : MessageBase
+    {
+        public List<Vector3> landmarkList;
+        public bool bIsMirror;
+
+        public PoseWorldLandListMsg(List<Vector3> landmarkList, bool bIsMirror)
+        {
+            this.landmarkList   = landmarkList;
+            this.bIsMirror      = bIsMirror;
+        }
+    }
+
+    public class MediapipeLandmarkListMsg : MessageBase
+    {
+        public List<Mediapipe.Landmark> landmarkList;
+        public bool bIsMirror;
+
+        public MediapipeLandmarkListMsg(List<Mediapipe.Landmark> landmarkList, bool bIsMirror)
+        {
+            this.landmarkList   = landmarkList;
+            this.bIsMirror      = bIsMirror;
+
+            Send();
+        }
+    }
+
+    public class PoseMaskMsg : MessageBase
+    {
+        public Mediapipe.Image maskImg;
+
+        public PoseMaskMsg(Mediapipe.Image maskImg)
+        {
+            this.maskImg = maskImg;
+        }
+    }
+
     public class PoseEstimationAdapter : LogicComponent
     {
         private bool bMirror;
@@ -54,6 +104,7 @@ namespace XPlan.ImageRecognize
         {
             List<NormalizedLandmarks> poseLandmarksList = result.poseLandmarks;
             reservePoseWorldLandmarkList                = result.poseWorldLandmarks;
+            List<Image> maskImg                         = result.segmentationMasks;
 
             // 依照2D資料確認要選取的pose index 再傳出3D資訊
 
@@ -130,6 +181,28 @@ namespace XPlan.ImageRecognize
             else
             {
                 pose3D.ClearLandmarks();
+            }
+
+            /*************************************************************
+             * 將 pose Image 資料送出
+             * **********************************************************/
+            
+            if (result.segmentationMasks.IsValidIndex(closestIdx))
+            {                
+                SendGlobalMsg<PoseMaskMsg>(result.segmentationMasks[closestIdx]);
+            }
+            else
+            {
+                SendGlobalMsg<PoseMaskMsg>(null);
+            }
+
+            // dispose mask data
+            if (result.segmentationMasks != null)
+            {
+                foreach (var mask in result.segmentationMasks)
+                {
+                    mask.Dispose();
+                }
             }
         }
 

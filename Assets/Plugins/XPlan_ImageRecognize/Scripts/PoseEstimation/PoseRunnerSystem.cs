@@ -16,6 +16,7 @@ namespace XPlan.ImageRecognize
         [SerializeField] private float minPoseDetectionConfidence   = 0.5f;
         [SerializeField] private float minPosePresenceConfidence    = 0.5f;
         [SerializeField] private float minTrackingConfidence        = 0.5f;
+        [SerializeField] private bool bSegmentationMasks            = false;
 
         [Header("Runner Adapter 設定")]
         [SerializeField] private int numShowPose                    = 1;
@@ -34,6 +35,8 @@ namespace XPlan.ImageRecognize
             poseRunner.config.MinPoseDetectionConfidence    = minPoseDetectionConfidence;
             poseRunner.config.MinPosePresenceConfidence     = minPosePresenceConfidence;
             poseRunner.config.MinTrackingConfidence         = minTrackingConfidence;
+            poseRunner.config.OutputSegmentationMasks       = bSegmentationMasks;
+
             poseRunner.config.Model     = modelType;
             poseRunner.config.NumPoses  = maxNumOfPose;
             poseRunner.runningMode      = runningMode;

@@ -13,44 +13,6 @@ using TextureFramePool = Mediapipe.Unity.Experimental.TextureFramePool;
 
 namespace XPlan.ImageRecognize
 {    
-    public class PoseLandListMsg : MessageBase
-    {
-        public List<Vector3> landmarkList;
-        public bool bIsMirror;
-
-        public PoseLandListMsg(List<Vector3> landmarkList, bool bIsMirror)
-        {
-            this.landmarkList   = landmarkList;
-            this.bIsMirror      = bIsMirror;
-        }
-    }
-
-    public class PoseWorldLandListMsg : MessageBase
-    {
-        public List<Vector3> landmarkList;
-        public bool bIsMirror;
-
-        public PoseWorldLandListMsg(List<Vector3> landmarkList, bool bIsMirror)
-        {
-            this.landmarkList   = landmarkList;
-            this.bIsMirror      = bIsMirror;
-        }
-    }
-
-    public class MediapipeLandmarkListMsg : MessageBase
-    {
-        public List<Landmark> landmarkList;
-        public bool bIsMirror;
-
-        public MediapipeLandmarkListMsg(List<Landmark> landmarkList, bool bIsMirror)
-        {
-            this.landmarkList   = landmarkList;
-            this.bIsMirror      = bIsMirror;
-
-            Send();
-        }
-    }
-
     public class PoseEstimationLogic : LogicComponent
     {
         private PoseEstimationGraph graphRunner;
