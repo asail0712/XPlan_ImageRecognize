@@ -15,13 +15,13 @@ namespace XPlan.ImageRecognize
 {
     public class PoseLandListMsg : MessageBase
     {
-        public List<Vector3> landmarkList;
+        public List<PTInfo> ptList;
         public bool bIsMirror;
 
-        public PoseLandListMsg(List<Vector3> landmarkList, bool bIsMirror)
+        public PoseLandListMsg(List<PTInfo> ptList, bool bIsMirror)
         {
-            this.landmarkList   = landmarkList;
-            this.bIsMirror      = bIsMirror;
+            this.ptList     = ptList;
+            this.bIsMirror  = bIsMirror;
         }
     }
 
@@ -116,7 +116,7 @@ namespace XPlan.ImageRecognize
             // 若沒有任何 pose，就送出空清單 且避免清除pose 2d資料
             if (currPoseCount == 0)
             {
-                SendGlobalMsg<PoseLandListMsg>(new List<Vector3>(), bMirror);
+                SendGlobalMsg<PoseLandListMsg>(new List<PTInfo>(), bMirror);
                 return;
             }
 
@@ -158,14 +158,14 @@ namespace XPlan.ImageRecognize
             /*************************************************************
              * 將 pose 2D 資料送出
              * **********************************************************/
-            List<Vector3> posList = new List<Vector3>();
+            List<PTInfo> ptList = new List<PTInfo>();
 
             for (int i = 0; i < pose2DList.Count; ++i)
             {
-                posList.AddRange(pose2DList[i].GetPtList());
+                ptList.AddRange(pose2DList[i].GetPtList());
             }
 
-            SendGlobalMsg<PoseLandListMsg>(posList, bMirror);
+            SendGlobalMsg<PoseLandListMsg>(ptList, bMirror);
 
             /*************************************************************
              * 將 pose 3D 資料送出
@@ -174,7 +174,7 @@ namespace XPlan.ImageRecognize
             {
                 List<Landmark> landmarks    = reservePoseWorldLandmarkList[closestIdx].landmarks;
                 pose3D.AddFrameLandmarks(landmarks);
-                List<Vector3> vecList       = pose3D.GetPtList();
+                List<Vector3> vecList       = pose3D.GetVecList();
 
                 SendGlobalMsg<MediapipeLandmarkListMsg>(vecList.ToMpLandmarkList(), bMirror);
             }

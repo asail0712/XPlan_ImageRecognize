@@ -1,18 +1,70 @@
 using Mediapipe.Tasks.Components.Containers;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 using XPlan.Utility;
 
 
 namespace XPlan.ImageRecognize
 {
+    public class PTInfo
+    {
+        public Vector3 pos;
+        public float visibility;
+        public float presence;
+
+        private readonly float alphaRise        = 0.6f;     // e.g. 0.5f（上升時追得快）
+        private readonly float alphaFall        = 0.1f;     // e.g. 0.2f（下降時追得慢）
+        private readonly float decayWhenMissing = 0.05f;    // e.g. 0.08f 每幀往 0 衰退量（raw==null）
+
+        public float x { get => pos.x; }
+        public float y { get => pos.y; }
+        public float z { get => pos.z; }
+
+        public PTInfo()
+        {
+            pos         = Vector3.zero;
+            visibility  = 0f;
+            presence    = 0f;
+        }
+
+        public void SetData(Vector3 pos, float? visibility, float? presence)
+        {
+            this.pos        = pos;
+            this.visibility = SmoothValue(visibility, this.visibility);
+            this.presence   = SmoothValue(presence, this.presence);
+        }
+
+        private float SmoothValue(float? targetRaw, float currRaw)
+        {
+            if (targetRaw.HasValue)
+            {
+                float x     = Mathf.Clamp01(targetRaw.Value);
+                float alpha = x >= currRaw ? alphaRise : alphaFall;
+                return Mathf.Lerp(currRaw, x, alpha);
+            }
+            else
+            {
+                // 缺資料時用「溫和衰退」而不是瞬間變 0
+                return Mathf.Max(0f, currRaw - decayWhenMissing);
+            }
+        }
+
+        public bool IsValid()
+        {
+            return visibility > 0.5f && presence > 0.5f;
+        }
+    }
+
+
     public class PoseLankInfo
     {
         // 原始（或平滑後）對外輸出的點位
-        private List<Vector3> posePtList;
+        private List<PTInfo> posePtList;
 
         // 內部平滑狀態
-        private List<Vector3> prevSmoothed;
+        private List<PTInfo> prevSmoothed;
         private bool bHasPrev;
 
         /// <summary>
@@ -30,8 +82,8 @@ namespace XPlan.ImageRecognize
 
         public PoseLankInfo() 
         {
-            posePtList      = new List<Vector3>();
-            prevSmoothed    = new List<Vector3>();
+            posePtList      = new List<PTInfo>();
+            prevSmoothed    = new List<PTInfo>();
             bHasPrev        = false;
 
             SmoothAlpha     = Mathf.Clamp01(SmoothAlpha);
@@ -60,8 +112,8 @@ namespace XPlan.ImageRecognize
                 {
                     var lmk         = landmarkList[i];
                     var raw         = new Vector3(lmk.x, lmk.y, 0f);
-                    prevSmoothed[i] = raw;
-                    posePtList[i]   = raw;
+                    prevSmoothed[i].SetData(raw, lmk.visibility, lmk.presence);
+                    posePtList[i].SetData(raw, lmk.visibility, lmk.presence);
                 }
                 bHasPrev = true;
                 return;
@@ -87,11 +139,11 @@ namespace XPlan.ImageRecognize
                 else
                 {
                     // 正常微動：指數平滑
-                    smoothed = Vector3.Lerp(prev, raw, SmoothAlpha);
+                    smoothed = Vector3.Lerp(prev.pos, raw, SmoothAlpha);
                 }
 
-                prevSmoothed[i] = smoothed;
-                posePtList[i]   = smoothed;
+                prevSmoothed[i].SetData(smoothed, lmk.visibility, lmk.presence);
+                posePtList[i].SetData(smoothed, lmk.visibility, lmk.presence);
             }
         }
 
@@ -117,8 +169,8 @@ namespace XPlan.ImageRecognize
                 {
                     var lmk         = landmarkList[i];
                     var raw         = new Vector3(lmk.x, lmk.y, lmk.z);
-                    prevSmoothed[i] = raw;
-                    posePtList[i]   = raw;
+                    prevSmoothed[i].SetData(raw, lmk.visibility, lmk.presence);
+                    posePtList[i].SetData(raw, lmk.visibility, lmk.presence);
                 }
                 bHasPrev = true;
                 return;
@@ -144,11 +196,11 @@ namespace XPlan.ImageRecognize
                 else
                 {
                     // 正常微動：指數平滑
-                    smoothed = Vector3.Lerp(prev, raw, SmoothAlpha);
+                    smoothed = Vector3.Lerp(prev.pos, raw, SmoothAlpha);
                 }
 
-                prevSmoothed[i] = smoothed;
-                posePtList[i]   = smoothed;
+                prevSmoothed[i].SetData(raw, lmk.visibility, lmk.presence);
+                posePtList[i].SetData(raw, lmk.visibility, lmk.presence);
             }
         }
 
@@ -157,9 +209,14 @@ namespace XPlan.ImageRecognize
             posePtList.Clear();
         }
 
-        public List<Vector3> GetPtList()
+        public List<PTInfo> GetPtList()
         {
             return posePtList;
+        }
+
+        public List<Vector3> GetVecList()
+        {
+            return posePtList.Select(x => x.pos).ToList();
         }
 
         public Vector3 GetHipCenter()
@@ -178,9 +235,8 @@ namespace XPlan.ImageRecognize
                 return Vector3.zero;
             }
 
-            return (posePtList[leftHipIdx] + posePtList[rightHipIdx]) / 2f;
+            return (posePtList[leftHipIdx].pos + posePtList[rightHipIdx].pos) / 2f;
         }
-
 
         public float DisSqrToScreenCenter(bool bVisualZ)
         {
@@ -191,7 +247,7 @@ namespace XPlan.ImageRecognize
 
             // 計算中心點
             Vector3 center = Vector3.zero;
-            foreach (Vector3 pt in posePtList)
+            foreach (PTInfo pt in posePtList)
             {
                 center += new Vector3(pt.x, pt.y, bVisualZ?pt.z:0f);
             }
@@ -213,14 +269,14 @@ namespace XPlan.ImageRecognize
             return posePtList.Count > 0;
         }
 
-        private static void EnsureSize(List<Vector3> list, int size)
+        private static void EnsureSize(List<PTInfo> list, int size)
         {
             if (list.Count < size)
             {
                 int add = size - list.Count;
                 for (int i = 0; i < add; ++i) 
                 {
-                    list.Add(Vector3.zero);
+                    list.Add(new PTInfo());
                 }
             }
             else if (list.Count > size)

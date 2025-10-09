@@ -88,12 +88,12 @@ namespace XPlan.ImageRecognize.Demo
                 InitMask(screen, imgSource.textureWidth, imgSource.textureHeight);
             });
 
-            ListenCall<(List<Vector3>, bool)>(UICommand.UpdatePose, (param) =>
+            ListenCall<(List<PTInfo>, bool)>(UICommand.UpdatePose, (param) =>
             {
-                List<Vector3> posList   = param.Item1;
-                bMirror                 = param.Item2;
+                List<PTInfo> ptList = param.Item1;
+                bMirror             = param.Item2;
 
-                if (posList == null || screenWidth.Equals(0f) || screenHeight.Equals(0f))
+                if (ptList == null || screenWidth.Equals(0f) || screenHeight.Equals(0f))
                 {
                     return;
                 }
@@ -105,12 +105,11 @@ namespace XPlan.ImageRecognize.Demo
 
                 for (int i = 0; i < pointList.Count; ++i)
                 {
-                    pointList[i].Enable = i < posList.Count;
+                    pointList[i].Enable = i < ptList.Count && ptList[i].IsValid();
 
                     if (pointList[i].Enable)
                     {
-                        Vector3 mediapipeXYZ = posList[i];
-                        pointList[i].SetPos(mediapipeXYZ, screenWidth, screenHeight, bMirror);
+                        pointList[i].SetPos(ptList[i].pos, screenWidth, screenHeight, bMirror);
                     }
                 }
             });
