@@ -1,6 +1,8 @@
 using Mediapipe;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+
 using UnityEngine;
 using XPlan.ImageRecognize;
 using XPlan.Observe;
@@ -21,7 +23,7 @@ namespace XPlan.ImageRecognize.Demo
             NotifySystem.Instance.RegisterNotify<PoseWorldLandListMsg>(this, (receiver) => 
             {
                 PoseWorldLandListMsg msg    = receiver.GetMessage<PoseWorldLandListMsg>();
-                landmarkList                = msg.landmarkList;
+                landmarkList                = msg.ptList.Select(x => x.pos).ToList();
             });
         }
 

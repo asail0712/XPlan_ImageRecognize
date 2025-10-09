@@ -1160,6 +1160,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 315520045927873496, guid: 71f62a94b0cc75548bcb5c2c55e28fe7,
         type: 3}
+      propertyPath: numShowPose
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 315520045927873496, guid: 71f62a94b0cc75548bcb5c2c55e28fe7,
+        type: 3}
       propertyPath: ptSmoothAlpha
       value: 0.1
       objectReference: {fileID: 0}

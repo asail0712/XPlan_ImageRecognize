@@ -17,6 +17,7 @@ namespace XPlan.ImageRecognize.Demo
         [SerializeField] private GameObject linePrefab;
         [SerializeField] private GameObject pointRoot;
         [SerializeField] private GameObject lineRoot;
+        [SerializeField] private GameObject centerRoot;
         [SerializeField] private RawImage screen;
 
         private static int MaxPose              = 3;
@@ -57,6 +58,7 @@ namespace XPlan.ImageRecognize.Demo
             screenWidth     = 0f;
             screenHeight    = 0f;
 
+            // 生成所有point
             for (int i = 0; i < PerPoseMaxPointNum * MaxPose; ++i)
             {
                 GameObject pointGO = GameObject.Instantiate(pointPrefab);
@@ -66,6 +68,7 @@ namespace XPlan.ImageRecognize.Demo
 
             for (int i = 0; i < MaxPose; ++i)
             {
+                // 生成所有line
                 for (int j = 0; j < CommonDefine.Connections.Count; ++j)
                 {
                     GameObject lineGO   = GameObject.Instantiate(linePrefab);
