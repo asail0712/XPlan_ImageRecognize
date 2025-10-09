@@ -29,6 +29,13 @@ namespace XPlan.ImageRecognize
             presence    = 0f;
         }
 
+        public PTInfo(Vector3 pos, float? visibility, float? presence)
+        {
+            this.pos        = pos;
+            this.visibility = visibility ?? 0f;
+            this.presence   = presence ?? 0f;
+        }
+
         public void SetData(Vector3 pos, float? visibility, float? presence)
         {
             this.pos        = pos;
@@ -199,8 +206,8 @@ namespace XPlan.ImageRecognize
                     smoothed = Vector3.Lerp(prev.pos, raw, SmoothAlpha);
                 }
 
-                prevSmoothed[i].SetData(raw, lmk.visibility, lmk.presence);
-                posePtList[i].SetData(raw, lmk.visibility, lmk.presence);
+                prevSmoothed[i].SetData(smoothed, lmk.visibility, lmk.presence);
+                posePtList[i].SetData(smoothed, lmk.visibility, lmk.presence);
             }
         }
 
