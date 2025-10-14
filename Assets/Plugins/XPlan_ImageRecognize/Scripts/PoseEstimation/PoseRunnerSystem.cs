@@ -44,7 +44,7 @@ namespace XPlan.ImageRecognize
 
         protected override void OnInitialLogic()
         {
-            RegisterLogic(new PoseEstimationAdapter(poseRunner, numShowPose, bMirror, ptSmoothAlpha, ptSnapDistance));
+            RegisterLogic(new PoseEstimationAdapter(poseRunner, numShowPose, bSegmentationMasks, bMirror, ptSmoothAlpha, ptSnapDistance));
         }
     }
 }

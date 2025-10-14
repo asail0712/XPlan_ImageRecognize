@@ -22,7 +22,7 @@ namespace XPlan.ImageRecognize.Demo
 
             RegisterNotify<PoseLandListMsg>((msg) => 
             {
-                DirectCallUI<(List<PTInfo>, bool)>(UICommand.UpdatePose, (msg.ptList, msg.bIsMirror));
+                DirectCallUI<(int, List<PTInfo>, bool)>(UICommand.UpdatePose, (msg.index, msg.ptList, msg.bIsMirror));
             });
 
             RegisterNotify<MediapipePoseMaskMsg>((msg) =>

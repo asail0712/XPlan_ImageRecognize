@@ -1,7 +1,9 @@
 using Mediapipe.Tasks.Components.Containers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
+using UnityEditor.Tilemaps;
 using UnityEngine;
 using XPlan.Utility;
 
@@ -64,7 +66,6 @@ namespace XPlan.ImageRecognize
         }
     }
 
-
     public class PoseLankInfo
     {
         // 原始（或平滑後）對外輸出的點位
@@ -80,12 +81,19 @@ namespace XPlan.ImageRecognize
         /// </summary>
         public float SmoothAlpha { get; set; } = 0.4f;
 
+        public int UniqueID { get; set; }
+        public Clock clock;
+        public Action<int, List<PTInfo>> finishAction;
+
         /// <summary>
         /// 瞬切門檻（以「歸一化座標」長度衡量，0~sqrt(2)）
         /// 典型人體點位在 0~1 空間中移動，0.12~0.2 通常表現不錯。
         /// </summary>
         public float snapDistance       = 0.15f;
         private float snapDistSqr       = 0f;
+
+        private float accumSkipTime     = 0f;
+        private float lastUpdateTime    = 0f;
 
         public PoseLankInfo() 
         {
@@ -107,6 +115,8 @@ namespace XPlan.ImageRecognize
                 // 不清 prev，因為可能只是短暫偵測不到
                 return;
             }
+
+            lastUpdateTime = clock.Now;
 
             // 確保容器長度
             EnsureSize(posePtList, n);
@@ -165,6 +175,8 @@ namespace XPlan.ImageRecognize
                 return;
             }
 
+            lastUpdateTime = clock.Now;
+
             // 確保容器長度
             EnsureSize(posePtList, n);
             EnsureSize(prevSmoothed, n);
@@ -213,6 +225,12 @@ namespace XPlan.ImageRecognize
 
         public void ClearLandmarks()
         {
+            // 超過一秒以上沒有資料 才要清除點資訊
+            if(clock.Now - lastUpdateTime < 1f)
+            {
+                return;
+            }
+
             posePtList.Clear();
         }
 
@@ -271,9 +289,9 @@ namespace XPlan.ImageRecognize
             }
         }
 
-        public bool HasPose()
+        public void FlushPose()
         {
-            return posePtList.Count > 0;
+            finishAction?.Invoke(UniqueID, posePtList);
         }
 
         private static void EnsureSize(List<PTInfo> list, int size)

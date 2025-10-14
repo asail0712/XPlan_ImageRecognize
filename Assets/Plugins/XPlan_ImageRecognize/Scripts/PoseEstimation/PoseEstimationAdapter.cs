@@ -6,6 +6,7 @@ using Mediapipe.Unity;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using XPlan.Interface;
 using XPlan.Observe;
 using XPlan.Utility;
 
@@ -13,13 +14,25 @@ using Landmark = Mediapipe.Tasks.Components.Containers.Landmark;
 
 namespace XPlan.ImageRecognize
 {
+    public class Clock
+    {
+        public float Now { get; set; }
+
+        public void Update()
+        {
+            Now = Time.time;
+        }
+    }
+
     public class PoseLandListMsg : MessageBase
     {
+        public int index;
         public List<PTInfo> ptList;
         public bool bIsMirror;
 
-        public PoseLandListMsg(List<PTInfo> ptList, bool bIsMirror)
+        public PoseLandListMsg(int index, List<PTInfo> ptList, bool bIsMirror)
         {
+            this.index      = index;
             this.ptList     = ptList;
             this.bIsMirror  = bIsMirror;
         }
@@ -49,6 +62,12 @@ namespace XPlan.ImageRecognize
         public List<Mediapipe.Landmark> landmarkList;
         public bool bIsMirror;
 
+        public MediapipeLandmarkListMsg()
+        {
+            landmarkList    = null;
+            bIsMirror       = false;
+        }
+
         public MediapipeLandmarkListMsg(List<Mediapipe.Landmark> landmarkList, bool bIsMirror)
         {
             this.landmarkList   = landmarkList;
@@ -60,45 +79,58 @@ namespace XPlan.ImageRecognize
     {
         public Mediapipe.Image maskImg;
 
+        public MediapipePoseMaskMsg()
+        {
+            this.maskImg = null;
+        }
+
         public MediapipePoseMaskMsg(Mediapipe.Image maskImg)
         {
             this.maskImg = maskImg;
         }
     }
 
-    public class PoseEstimationAdapter : LogicComponent
+    public class PoseEstimationAdapter : LogicComponent, ITickable
     {
         private bool bMirror;
         private List<PoseLankInfo> pose2DList;
         private List<PoseLankInfo> pose3DList;
-        private PoseLankInfo pose3D;
         private int numShowPose = 1;
+        private bool bSegmentationMasks;
+        private Clock clock;
+        private List<int> selectedIdxs;
 
-        public PoseEstimationAdapter(PoseEstimationRunner poseRunner, int numShowPose, bool bMirror, float ptSmoothAlpha, float ptSnapDistance)
+
+        public PoseEstimationAdapter(PoseEstimationRunner poseRunner, int numShowPose, bool bSegmentationMasks, bool bMirror, float ptSmoothAlpha, float ptSnapDistance)
         {            
-            this.bMirror        = bMirror;
-            this.pose2DList     = new List<PoseLankInfo>();
-            this.pose3DList     = new List<PoseLankInfo>();
-            this.pose3D         = new PoseLankInfo();
-            this.numShowPose    = numShowPose;
+            this.bMirror            = bMirror;
+            this.pose2DList         = new List<PoseLankInfo>();
+            this.pose3DList         = new List<PoseLankInfo>();
+            this.numShowPose        = numShowPose;
+            this.bSegmentationMasks = bSegmentationMasks;
+            this.clock              = new Clock();
+            this.selectedIdxs       = new List<int>();
 
             for (int i = 0; i < poseRunner.config.NumPoses; ++i)
             {
                 pose2DList.Add(new PoseLankInfo() 
                 {
+                    UniqueID        = i,
                     SmoothAlpha     = ptSmoothAlpha,
                     snapDistance    = ptSnapDistance,
+                    clock           = clock,
+                    finishAction    = FlushPose2D,
                 });
 
                 pose3DList.Add(new PoseLankInfo()
                 {
+                    UniqueID        = i,
                     SmoothAlpha     = ptSmoothAlpha,
                     snapDistance    = ptSnapDistance,
+                    clock           = clock,
+                    finishAction    = FlushPose3D,                    
                 });
             }
-
-            pose3D.SmoothAlpha  = ptSmoothAlpha;
-            pose3D.snapDistance = ptSnapDistance;
 
             poseRunner.imgInitFinish += (imgSource) => 
             {
@@ -107,46 +139,110 @@ namespace XPlan.ImageRecognize
 
             poseRunner.resultReceived += (result) =>
             {
-                ProcessPoseLandmark(result);
+                int currPoseCount = result.poseLandmarks != null ? result.poseLandmarks.Count : 0;
+
+                // 若沒有任何 pose，就送出空清單 且避免清除pose 2d資料
+                if (currPoseCount == 0)
+                {
+                    ClearPoseLandmark();
+                    return;
+                }
+
+                // 添加Pose 2D資料
+                AddPoseLandmark(currPoseCount, result);
+
+                // 依照Pose 2D條件選取適合的Pose 
+                FilterMatchPose(currPoseCount, result, ref selectedIdxs);
+
+                // 依照選中條件顯示對應的 Pose3D
+                AddPoseWorldLandmark(currPoseCount, result, selectedIdxs);
+
+                // 依照選中條件顯示對應的 Mask
+                ProcessPoseMask(currPoseCount, result, selectedIdxs);
             };
         }
 
-        private void ProcessPoseLandmark(PoseLandmarkerResult result)
+        private void AddPoseWorldLandmark(int currPoseCount, PoseLandmarkerResult result, List<int> selectidxs)
         {
-            List<NormalizedLandmarks> poseLandmarksList = result.poseLandmarks;
-            List<Landmarks> poseWorldLandmarkList       = result.poseWorldLandmarks;
-            List<Image> maskImg                         = result.segmentationMasks;
-
-            // 依照2D資料確認要選取的pose index 再傳出3D資訊
+            List<Landmarks> poseLandmarksList = result.poseWorldLandmarks;
 
             /***************************************
              * 依照 pose數量 修改 pose2DList資料
              * ************************************/
-            int currPoseCount = poseLandmarksList != null ? poseLandmarksList.Count : 0;
-
-            // 若沒有任何 pose，就送出空清單 且避免清除pose 2d資料
-            if (currPoseCount == 0)
+            for (int i = 0; i < pose3DList.Count; ++i)
             {
-                SendGlobalMsg<PoseLandListMsg>(new List<PTInfo>(), bMirror);
-                return;
-            }
+                bool b = poseLandmarksList != null && i < poseLandmarksList.Count;
 
+                if (!b)
+                {
+                    // 沒找到目標 因此移除pose資料
+                    pose3DList[i].ClearLandmarks();
+
+                    continue;
+                }
+
+                if (!selectidxs.Contains(i))
+                {
+                    // 目標不符合篩選 因此移除pose資料
+                    pose3DList[i].ClearLandmarks();
+
+                    continue;
+                }
+
+                // 加入pose資料
+                pose3DList[i].AddFrameLandmarks(poseLandmarksList[i].landmarks);
+            }
+        }
+
+        private void ClearPoseLandmark()
+        {
+            SendGlobalMsg<MediapipePoseMaskMsg>();
+
+            for (int i = 0; i < pose2DList.Count; ++i)
+            {
+                // 沒找到目標 因此移除pose資料
+                pose2DList[i].ClearLandmarks();
+            }
+        }
+
+        private void AddPoseLandmark(int currPoseCount, PoseLandmarkerResult result)
+        {
+            List<NormalizedLandmarks> poseLandmarksList = result.poseLandmarks;
+            List<Mediapipe.Image> poseMaskImgList       = result.segmentationMasks;
+
+            /***************************************
+             * 依照 pose數量 修改 pose2DList資料
+             * ************************************/
             for (int i = 0; i < pose2DList.Count; ++i)
             {
                 bool b = poseLandmarksList != null && i < poseLandmarksList.Count;
 
-                if (b)
-                {
-                    // 加入pose資料
-                    pose2DList[i].AddFrameLandmarks(poseLandmarksList[i].landmarks);
-                }
-                else
+                if(!b)
                 {
                     // 沒找到目標 因此移除pose資料
                     pose2DList[i].ClearLandmarks();
-                }
-            }
 
+                    continue;
+                }
+
+                bool bIsPoseValid = poseLandmarksList[i].IsPoseValid();
+                bool bIsMaskValid = !bSegmentationMasks || poseMaskImgList[i].IsMaskValid();
+
+                if (!bIsPoseValid || !bIsMaskValid)
+                {
+                    // 目標不符合篩選 因此移除pose資料
+                    pose2DList[i].ClearLandmarks();
+
+                    continue;
+                }
+
+                // 加入pose資料
+                pose2DList[i].AddFrameLandmarks(poseLandmarksList[i].landmarks);
+            }
+        }
+
+        private void FilterMatchPose(int currPoseCount, PoseLandmarkerResult result, ref List<int> closestIdxs)
+        {
             /***************************************
              * 檢查 pose 過近時 要刪除其中一個
              * ************************************/
@@ -160,94 +256,42 @@ namespace XPlan.ImageRecognize
             /*************************************************************
              * 依照 numShowPose 決定顯示幾個Pose (以靠近中間為主)
              * **********************************************************/
-            List<int> closestIdxs   = new List<int>();
             int filterNearestPose   = currPoseCount;
             int finalPoseCount      = KeepClosestToCenter(ref pose2DList, ref closestIdxs);
-            int closestIdx          = -1;
 
             if (finalPoseCount > 0)
             {
                 Debug.Log($"Total Pose Count: {totalPoseCount}, Filter Nearest Pose: {filterNearestPose}, Final Pose Count: {finalPoseCount}, Closest Index: {closestIdxs[0]}");
-
-                closestIdx = closestIdxs[0];
             }
             else
             {
                 Debug.Log($"Total Pose Count: {totalPoseCount}, Filter Nearest Pose: {filterNearestPose}, Final Pose Count: 0");
             }
+        }
 
-            /*************************************************************
-             * 將 pose 2D 資料送出
-             * **********************************************************/
-            List<PTInfo> ptList = new List<PTInfo>();
-
-            for (int i = 0; i < pose2DList.Count; ++i)
+        private void ProcessPoseMask(int currPoseCount, PoseLandmarkerResult result, List<int> selectidxs)
+        {
+            if(!bSegmentationMasks)
             {
-                ptList.AddRange(pose2DList[i].GetPtList());
-            }
-
-            SendGlobalMsg<PoseLandListMsg>(ptList, bMirror);
-
-            /*************************************************************
-             * 將選中的 pose 3D 資料送出
-             * **********************************************************/
-            if(poseWorldLandmarkList.IsValidIndex(closestIdx))
-            {
-                List<Landmark> landmarks    = poseWorldLandmarkList[closestIdx].landmarks;
-                pose3D.AddFrameLandmarks(landmarks);
-                List<Vector3> vecList       = pose3D.GetVecList();
-
-                SendGlobalMsg<MediapipeLandmarkListMsg>(vecList.ToMpLandmarkList(), bMirror);
-            }
-            else
-            {
-                pose3D.ClearLandmarks();
-            }
-
-            /*************************************************************
-             * 將有效的 pose 3D 資料送出
-             * **********************************************************/
-            if (finalPoseCount == 0)
-            {
-                SendGlobalMsg<PoseLandListMsg>(new List<PTInfo>(), bMirror);
                 return;
             }
 
-            for (int i = 0; i < pose3DList.Count; ++i)
-            {
-                // 依照選中的pose去過濾3D資料
-                if (closestIdxs.Contains(i))
-                {
-                    // 加入pose資料
-                    pose3DList[i].AddFrameLandmarks(poseWorldLandmarkList[i].landmarks);
-                }
-                else
-                {
-                    // 沒找到目標 因此移除pose資料
-                    pose3DList[i].ClearLandmarks();
-                }
-            }
+            List<Image> poseMasks = result.segmentationMasks;
 
-            List<PTInfo> pt3DList = new List<PTInfo>();
-
-            for (int i = 0; i < pose3DList.Count; ++i)
-            {
-                pt3DList.AddRange(pose3DList[i].GetPtList());
-            }
-
-            SendGlobalMsg<PoseWorldLandListMsg>(pt3DList, bMirror);
-
-            
             /*************************************************************
              * 將選中的 pose Image 資料送出
              * **********************************************************/
-            if (result.segmentationMasks.IsValidIndex(closestIdx))
-            {                
-                SendGlobalMsg<MediapipePoseMaskMsg>(result.segmentationMasks[closestIdx]);
+            if (selectidxs.Count == 0)
+            {
+                SendGlobalMsg<MediapipePoseMaskMsg>();
+            }
+            else if(!result.segmentationMasks.IsValidIndex(selectidxs[0]))
+            {
+                SendGlobalMsg<MediapipePoseMaskMsg>();
             }
             else
             {
-                SendGlobalMsg<MediapipePoseMaskMsg>(null);
+                SendGlobalMsg<MediapipePoseMaskMsg>(result.segmentationMasks[selectidxs[0]]);
             }
 
             // dispose mask data
@@ -259,6 +303,45 @@ namespace XPlan.ImageRecognize
                 }
             }
         }
+
+        public void Tick(float deltaTime)
+        {
+            clock.Update();
+
+            for (int i = 0; i < pose2DList.Count; ++i)
+            {
+                pose2DList[i].FlushPose();
+            }
+
+            for (int i = 0; i < pose3DList.Count; ++i)
+            {
+                pose3DList[i].FlushPose();
+            }
+        }
+
+        private void FlushPose2D(int index, List<PTInfo> ptList)
+        {
+            if(!selectedIdxs.Contains(index))
+            {
+                SendGlobalMsg<PoseLandListMsg>(index, new List<PTInfo>(), bMirror);
+                return;
+            }
+
+            SendGlobalMsg<PoseLandListMsg>(index, ptList, bMirror);
+        }
+
+        private void FlushPose3D(int index, List<PTInfo> ptList)
+        {
+            if(!selectedIdxs.Contains(index))
+            {
+                SendGlobalMsg<MediapipeLandmarkListMsg>();
+
+                return;
+            }
+
+            List<Vector3> vecList = ptList.Select(x => x.pos).ToList();
+            SendGlobalMsg<MediapipeLandmarkListMsg>(vecList.ToMpLandmarkList(), bMirror);
+         }
 
         private int FilterTooNearPose(ref List<PoseLankInfo> poseList, int currPoseCount, float thredhoild = 0.05f)
         {

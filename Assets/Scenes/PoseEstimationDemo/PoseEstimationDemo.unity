@@ -1165,13 +1165,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 315520045927873496, guid: 71f62a94b0cc75548bcb5c2c55e28fe7,
         type: 3}
+      propertyPath: maxNumOfPose
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 315520045927873496, guid: 71f62a94b0cc75548bcb5c2c55e28fe7,
+        type: 3}
       propertyPath: ptSmoothAlpha
-      value: 0.1
+      value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 315520045927873496, guid: 71f62a94b0cc75548bcb5c2c55e28fe7,
         type: 3}
       propertyPath: ptSnapDistance
-      value: 0.1
+      value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: 315520045927873496, guid: 71f62a94b0cc75548bcb5c2c55e28fe7,
         type: 3}

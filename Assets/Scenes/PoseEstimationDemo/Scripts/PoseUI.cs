@@ -1,4 +1,5 @@
 using Mediapipe.Unity;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
@@ -91,12 +92,13 @@ namespace XPlan.ImageRecognize.Demo
                 InitMask(screen, imgSource.textureWidth, imgSource.textureHeight);
             });
 
-            ListenCall<(List<PTInfo>, bool)>(UICommand.UpdatePose, (param) =>
+            ListenCall<(int, List<PTInfo>, bool)>(UICommand.UpdatePose, (param) =>
             {
-                List<PTInfo> ptList = param.Item1;
-                bMirror             = param.Item2;
+                int index           = param.Item1;
+                List<PTInfo> ptList = param.Item2;
+                bMirror             = param.Item3;
 
-                if (ptList == null || screenWidth.Equals(0f) || screenHeight.Equals(0f))
+                if (ptList == null || screenWidth.Equals(0f) || screenHeight.Equals(0f) || index >= MaxPose)
                 {
                     return;
                 }
@@ -106,19 +108,26 @@ namespace XPlan.ImageRecognize.Demo
 
                 //Debug.Log($"Count: {modelCount} Len: {posList.Count}");
 
-                for (int i = 0; i < pointList.Count; ++i)
+                for (int i = 0; i < PerPoseMaxPointNum; ++i)
                 {
-                    pointList[i].Enable = i < ptList.Count && ptList[i].IsValid();
+                    int pointIndex                  = i + index * PerPoseMaxPointNum;
+                    pointList[pointIndex].Enable    = i < ptList.Count && ptList[i].IsValid();
 
-                    if (pointList[i].Enable)
+                    if (pointList[pointIndex].Enable)
                     {
-                        pointList[i].SetPos(ptList[i].pos, screenWidth, screenHeight, bMirror);
+                        pointList[pointIndex].SetPos(ptList[i].pos, screenWidth, screenHeight, bMirror);
                     }
                 }
             });
 
             ListenCall<Mediapipe.Image>(UICommand.UpdatePoseMask, (maskImg) =>
             {
+                if (maskImg == null)
+                {
+                    Array.Clear(maskArray, 0, maskArray.Length);
+                    return;
+                }
+
                 if (maskArray != null)
                 {
                     maskImg.TryReadChannelNormalized(0, maskArray, bMirror);
