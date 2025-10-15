@@ -223,10 +223,10 @@ namespace XPlan.ImageRecognize
             }
         }
 
-        public void ClearLandmarks()
+        public void ClearLandmarks(bool bImmediately = false)
         {
             // 超過一秒以上沒有資料 才要清除點資訊
-            if(clock.Now - lastUpdateTime < 1f)
+            if(!bImmediately && clock.Now - lastUpdateTime < 1f)
             {
                 return;
             }

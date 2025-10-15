@@ -176,7 +176,7 @@ namespace XPlan.ImageRecognize
                 if (!b)
                 {
                     // 沒找到目標 因此移除pose資料
-                    pose3DList[i].ClearLandmarks();
+                    pose3DList[i].ClearLandmarks(true);
 
                     continue;
                 }
@@ -184,7 +184,7 @@ namespace XPlan.ImageRecognize
                 if (!selectidxs.Contains(i))
                 {
                     // 目標不符合篩選 因此移除pose資料
-                    pose3DList[i].ClearLandmarks();
+                    pose3DList[i].ClearLandmarks(true);
 
                     continue;
                 }
@@ -250,7 +250,10 @@ namespace XPlan.ImageRecognize
 
             if (currPoseCount > 1)
             {
-                currPoseCount = FilterTooNearPose(ref pose2DList, currPoseCount);
+                if(FilterTooNearPose(ref pose2DList, ref currPoseCount))
+                {
+                    //Debug.LogWarning("Pose Too Closest");
+                }
             }
 
             /*************************************************************
@@ -343,7 +346,7 @@ namespace XPlan.ImageRecognize
             SendGlobalMsg<MediapipeLandmarkListMsg>(vecList.ToMpLandmarkList(), bMirror);
          }
 
-        private int FilterTooNearPose(ref List<PoseLankInfo> poseList, int currPoseCount, float thredhoild = 0.05f)
+        private bool FilterTooNearPose(ref List<PoseLankInfo> poseList, ref int currPoseCount, float thredhoild = 0.05f)
         {
             float sqrThreshold      = Mathf.Pow(thredhoild, 2f);            // 可依實測調整
             List<int> delIdxList    = new List<int>();
@@ -367,13 +370,13 @@ namespace XPlan.ImageRecognize
             {
                 for (int k = delIdxList.Count - 1; k >= 0; --k)
                 {
-                    poseList[delIdxList[k]].ClearLandmarks();
+                    poseList[delIdxList[k]].ClearLandmarks(true);
                 }
             }
 
             currPoseCount -= delIdxList.Count;
 
-            return currPoseCount;
+            return delIdxList.Count > 0;
         }
 
         private int KeepClosestToCenter(ref List<PoseLankInfo> poseList, ref List<int> closestPoseIndexs)
