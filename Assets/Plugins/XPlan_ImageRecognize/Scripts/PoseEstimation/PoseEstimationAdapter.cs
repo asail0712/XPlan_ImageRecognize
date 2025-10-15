@@ -102,7 +102,7 @@ namespace XPlan.ImageRecognize
 
 
         public PoseEstimationAdapter(PoseEstimationRunner poseRunner, int numShowPose, bool bSegmentationMasks, bool bMirror, float ptSmoothAlpha, float ptSnapDistance)
-        {            
+        {
             this.bMirror            = bMirror;
             this.pose2DList         = new List<PoseLankInfo>();
             this.pose3DList         = new List<PoseLankInfo>();
@@ -113,7 +113,7 @@ namespace XPlan.ImageRecognize
 
             for (int i = 0; i < poseRunner.config.NumPoses; ++i)
             {
-                pose2DList.Add(new PoseLankInfo() 
+                pose2DList.Add(new PoseLankInfo()
                 {
                     UniqueID        = i,
                     SmoothAlpha     = ptSmoothAlpha,
@@ -128,11 +128,11 @@ namespace XPlan.ImageRecognize
                     SmoothAlpha     = ptSmoothAlpha,
                     snapDistance    = ptSnapDistance,
                     clock           = clock,
-                    finishAction    = FlushPose3D,                    
+                    finishAction    = FlushPose3D,
                 });
             }
 
-            poseRunner.imgInitFinish += (imgSource) => 
+            poseRunner.imgInitFinish += (imgSource) =>
             {
                 SendGlobalMsg<TexturePrepareMsg>(imgSource);
             };

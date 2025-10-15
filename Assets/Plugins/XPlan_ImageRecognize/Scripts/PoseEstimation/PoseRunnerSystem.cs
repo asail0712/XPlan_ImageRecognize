@@ -22,6 +22,7 @@ namespace XPlan.ImageRecognize
         [SerializeField] private int numShowPose                    = 1;
         [SerializeField] private float ptSmoothAlpha                = 0.4f;
         [SerializeField] private float ptSnapDistance               = 0.15f;
+        [SerializeField] private bool bMonitorActive                = false;
 
         protected override void OnPreInitial()
         {
@@ -45,6 +46,7 @@ namespace XPlan.ImageRecognize
         protected override void OnInitialLogic()
         {
             RegisterLogic(new PoseEstimationAdapter(poseRunner, numShowPose, bSegmentationMasks, bMirror, ptSmoothAlpha, ptSnapDistance));
+            RegisterLogic(new PoseEstimationMonitor(poseRunner, bMonitorActive, bMirror));
         }
     }
 }

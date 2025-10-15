@@ -1,3 +1,4 @@
+using Mediapipe;
 using Mediapipe.Tasks.Components.Containers;
 using Mediapipe.Unity;
 
@@ -7,7 +8,8 @@ using UnityEngine;
 
 using XPlan.Utility;
 
-using Rect = UnityEngine.Rect;
+using Rect                  = UnityEngine.Rect;
+using NormalizedLandmark    = Mediapipe.Tasks.Components.Containers.NormalizedLandmark;
 
 namespace XPlan.ImageRecognize
 {
@@ -46,18 +48,28 @@ namespace XPlan.ImageRecognize
 
         public static bool IsMaskValid(this Mediapipe.Image maskImg, float minCoverage = 0.02f, float maxCoverage = 0.35f, float threshold = 0.5f)
         {
+            // 計算遮罩覆蓋比例
+            float maskCoverage = GetMaskCoverage(maskImg, threshold);
+
+            /**********************************************
+             * 有效性判斷
+             **********************************************/
+            return maskCoverage >= minCoverage && maskCoverage <= maxCoverage;
+        }
+
+        public static float GetMaskCoverage(this Mediapipe.Image maskImg, float threshold = 0.5f)
+        {
             /**********************************************
              * 遮罩覆蓋度計算
              **********************************************/
-            if (maskImg == null || maskImg.isDisposed)
-                return false;
+            if (maskImg == null || maskImg.isDisposed)  return 0f;
 
             // 取得遮罩畫面尺寸
             int width       = maskImg.Width();
             int height      = maskImg.Height();
             int totalPixels = width * height;
-            
-            if(maskArray == null || maskArray.Length != totalPixels)
+
+            if (maskArray == null || maskArray.Length != totalPixels)
             {
                 maskArray = new float[totalPixels];
             }
@@ -67,13 +79,11 @@ namespace XPlan.ImageRecognize
             // 這裡轉成 Texture2D 來存取，或直接用 Unsafe API 讀 buffer
             // 這裡假設你已在 CPU 上可讀（非 GPU buffer）
             // ↓ 用 ImageFrame 版本更保險
-            if (!maskImg.TryReadChannelNormalized(0, maskArray, false))
-            {
-                return true;
-            }
+            if (!maskImg.TryReadChannelNormalized(0, maskArray, false)) return 0f;
 
             // 統計大於閾值的像素數
             int humanPixels = 0;
+
             for (int i = 0; i < maskArray.Length; i++)
             {
                 if (maskArray[i] >= threshold)
@@ -83,12 +93,7 @@ namespace XPlan.ImageRecognize
             }
 
             // 計算遮罩覆蓋比例
-            float maskCoverage = (float)humanPixels / totalPixels;
-
-            /**********************************************
-             * 有效性判斷
-             **********************************************/
-            return maskCoverage >= minCoverage && maskCoverage <= maxCoverage;
+            return (float)humanPixels / totalPixels;
         }
 
         public static bool IsValidJoints(this NormalizedLandmarks landmarks, float visibility = 0.5f, float presence = 0.5f)
@@ -125,34 +130,34 @@ namespace XPlan.ImageRecognize
         }
 
         public static bool IsFaceFront(this NormalizedLandmarks landmarks, float ang = 75f)
+        {            
+            // 小於門檻視為「面向相機」
+            return GetFaceFrontAngle(landmarks) <= ang;
+        }
+
+        public static float GetFaceFrontAngle(this NormalizedLandmarks landmarks)
         {
+            float facingAng = 180f;
+
             if (!landmarks.FindJointPos(BodyPoseType.LeftShoulder, out Vector3 leftShoulderPos))
             {
-                return false;
+                return facingAng;
             }
 
             if (!landmarks.FindJointPos(BodyPoseType.RightShoulder, out Vector3 rightShoulderPos))
             {
-                return false;
+                return facingAng;
             }
 
             if (!landmarks.FindJointPos(BodyPoseType.LeftHip, out Vector3 leftHipPos))
             {
-                return false;
+                return facingAng;
             }
 
             if (!landmarks.FindJointPos(BodyPoseType.RightHip, out Vector3 rightHipPos))
             {
-                return false;
+                return facingAng;
             }
-
-            // 小於門檻視為「面向相機」
-            return GetFaceFrontAngle(leftShoulderPos, rightShoulderPos, leftHipPos, rightHipPos) <= ang;
-        }
-
-        public static float GetFaceFrontAngle(Vector3 leftShoulderPos, Vector3 rightShoulderPos, Vector3 leftHipPos, Vector3 rightHipPos)
-        {
-            float facingAng     = 180f;
 
             // 核心向量
             Vector3 shoulderVec = (rightShoulderPos - leftShoulderPos);
@@ -239,6 +244,7 @@ namespace XPlan.ImageRecognize
 
             return true;
         }
+
         /******************************************
          * 工具類
          * ***************************************/
