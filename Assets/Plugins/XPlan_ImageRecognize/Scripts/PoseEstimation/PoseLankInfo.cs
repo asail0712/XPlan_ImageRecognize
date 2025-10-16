@@ -31,6 +31,13 @@ namespace XPlan.ImageRecognize
             presence    = 0f;
         }
 
+        public PTInfo(Mediapipe.Tasks.Components.Containers.Landmark landmark)
+        {
+            this.pos        = new Vector3(landmark.x, landmark.y, landmark.z);
+            this.visibility = landmark.visibility ?? 0f;
+            this.presence   = landmark.presence ?? 0f;
+        }
+
         public PTInfo(Vector3 pos, float? visibility, float? presence)
         {
             this.pos        = pos;

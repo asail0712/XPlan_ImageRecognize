@@ -51,11 +51,13 @@ namespace XPlan.ImageRecognize
 
     public class PoseWorldLandListMsg : MessageBase
     {
+        public int index;
         public List<PTInfo> ptList;
         public bool bIsMirror;
 
-        public PoseWorldLandListMsg(List<PTInfo> ptList, bool bIsMirror)
+        public PoseWorldLandListMsg(int index, List<PTInfo> ptList, bool bIsMirror)
         {
+            this.index      = index;
             this.ptList     = ptList;
             this.bIsMirror  = bIsMirror;
         }
@@ -200,6 +202,11 @@ namespace XPlan.ImageRecognize
 
                 // 加入pose資料
                 pose3DList[i].AddFrameLandmarks(poseLandmarksList[i].landmarks);
+
+                // 送出選中資料
+                List<PTInfo> ptList = poseLandmarksList[i].landmarks.Select(x => new PTInfo(x)).ToList();
+
+                SendGlobalMsgAsync<PoseWorldLandListMsg>(i, ptList, bMirror);
             }
         }
 

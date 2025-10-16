@@ -5,30 +5,28 @@ using System.Linq;
 
 using UnityEngine;
 using XPlan.ImageRecognize;
+using XPlan.Interface;
 using XPlan.Observe;
 
 namespace XPlan.ImageRecognize.Demo
 {
-    public class PoseChecker : MonoBehaviour, INotifyReceiver
+    public class PoseChecker : LogicComponent, ITickable
     {
-        public Func<string> GetLazyZoneID { get; set; }
-
         private List<Vector3> landmarkList;
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Awake()
+        public PoseChecker()
         {
             landmarkList = null;
 
-            NotifySystem.Instance.RegisterNotify<PoseWorldLandListMsg>(this, (receiver) => 
+            RegisterNotify<PoseWorldLandListMsg>((msg) => 
             {
-                PoseWorldLandListMsg msg    = receiver.GetMessage<PoseWorldLandListMsg>();
-                landmarkList                = msg.ptList.Select(x => x.pos).ToList();
+                landmarkList = msg.ptList.Select(x => x.pos).ToList();
             });
         }
 
         // Update is called once per frame
-        void Update()
+        public void Tick(float deltaTime)
         {
             if(landmarkList == null || landmarkList.Count != (int)BodyPoseType.NumOtType)
             {
@@ -37,20 +35,20 @@ namespace XPlan.ImageRecognize.Demo
 
             if (BodyPoseChecker.IsRightBicepsCurl(landmarkList, 110f))
             {
-                Debug.Log("Right Biceps Curl");
+                DirectCallUI<string>(UICommand.RightBicepsCurl, "Right Biceps Curl");
             }
             else
             {
-                Debug.Log("Right Biceps Straight");
+                DirectCallUI<string>(UICommand.RightBicepsStraight, "Right Biceps Straight");
             }
 
             if (BodyPoseChecker.IsLeftBicepsCurl(landmarkList, 110f))
             {
-                Debug.Log("Left Biceps Curl");
+                DirectCallUI<string>(UICommand.LeftBicepsCurl, "Left Biceps Curl");
             }
             else
             {
-                Debug.Log("Left Biceps Straight");
+                DirectCallUI<string>(UICommand.LeftBicepsStraight, "Left Biceps Straight");
             }
         }
     }

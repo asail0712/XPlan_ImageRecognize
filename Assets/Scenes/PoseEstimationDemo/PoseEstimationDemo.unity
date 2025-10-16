@@ -657,7 +657,7 @@ GameObject:
   - component: {fileID: 860274245}
   - component: {fileID: 860274246}
   m_Layer: 0
-  m_Name: PosChecker
+  m_Name: PosCheckerSystem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -687,7 +687,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 860274244}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a07cec7a33a2cd24d929e3b6a876ce3c, type: 3}
+  m_Script: {fileID: 11500000, guid: a977f21ad4d87ab4eb23030737c10a97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1162806266
@@ -943,7 +943,12 @@ PrefabInstance:
     - target: {fileID: 5728745971265054887, guid: acc8c5cb2735ef145a9f3ac75e13ec81,
         type: 3}
       propertyPath: loadingList.Array.size
-      value: 1
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5728745971265054887, guid: acc8c5cb2735ef145a9f3ac75e13ec81,
+        type: 3}
+      propertyPath: loadingList.Array.data[1].sortIdx
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 5728745971265054887, guid: acc8c5cb2735ef145a9f3ac75e13ec81,
         type: 3}
@@ -958,7 +963,23 @@ PrefabInstance:
         type: 3}
     - target: {fileID: 5728745971265054887, guid: acc8c5cb2735ef145a9f3ac75e13ec81,
         type: 3}
+      propertyPath: loadingList.Array.data[1].bVisible
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5728745971265054887, guid: acc8c5cb2735ef145a9f3ac75e13ec81,
+        type: 3}
+      propertyPath: loadingList.Array.data[1].uiPerfab
+      value: 
+      objectReference: {fileID: 3641604264685976721, guid: 5ebb5cce20915f24ca7924fd51278795,
+        type: 3}
+    - target: {fileID: 5728745971265054887, guid: acc8c5cb2735ef145a9f3ac75e13ec81,
+        type: 3}
       propertyPath: loadingList.Array.data[0].bIsPersistentUI
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5728745971265054887, guid: acc8c5cb2735ef145a9f3ac75e13ec81,
+        type: 3}
+      propertyPath: loadingList.Array.data[1].bIsPersistentUI
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -1158,6 +1179,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 315520045927873496, guid: 71f62a94b0cc75548bcb5c2c55e28fe7,
+        type: 3}
+      propertyPath: bMirror
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 315520045927873496, guid: 71f62a94b0cc75548bcb5c2c55e28fe7,
         type: 3}
       propertyPath: numShowPose

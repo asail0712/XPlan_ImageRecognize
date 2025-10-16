@@ -19,7 +19,7 @@ namespace XPlan.ImageRecognize
         MouthLeft,
         MouthRight,
 
-        LeftShoulder,
+        LeftShoulder    = 11,
         RightShoulder,
         LeftElbow,
         RightElbow,
@@ -33,7 +33,7 @@ namespace XPlan.ImageRecognize
         LeftThumb,
         RightThumb,
 
-        LeftHip,
+        LeftHip         = 23,
         RightHip,
         LeftKnee,
         RightKnee,
@@ -50,7 +50,9 @@ namespace XPlan.ImageRecognize
 
     public static class BodyPoseChecker
     {
-        public static bool IsRightBicepsCurl(this List<Vector3> bodyPoseList, float angle = 90f)
+        // 左右是反的
+
+        public static bool IsLeftBicepsCurl(this List<Vector3> bodyPoseList, float angle = 90f)
         {
             if (bodyPoseList == null || bodyPoseList.Count != (int)BodyPoseType.NumOtType)
             {
@@ -87,10 +89,12 @@ namespace XPlan.ImageRecognize
             // （可選）手腕高度至少不低於肘部，避免下垂卻夾角小的誤判(hip以上是負，以下是正)
             bool wristNotBelowElbow = rightWrist.y <= rightElbow.y;
 
+            //Debug.Log($"{elbowFlexed}  {wristNearShoulder}  {wristNotBelowElbow}");
+
             return elbowFlexed && wristNearShoulder && wristNotBelowElbow;
         }
 
-        public static bool IsLeftBicepsCurl(this List<Vector3> bodyPoseList, float angle = 90f)
+        public static bool IsRightBicepsCurl(this List<Vector3> bodyPoseList, float angle = 90f)
         {
             if (bodyPoseList == null || bodyPoseList.Count != (int)BodyPoseType.NumOtType)
             {

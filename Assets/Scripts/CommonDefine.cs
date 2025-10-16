@@ -60,13 +60,20 @@ namespace XPlan.ImageRecognize.Demo
     {
         public const string InitScreen          = "InitScreen";
 
+        // pose runner
         public const string UpdateMask          = "UpdateMask";
         public const string UpdatePose          = "UpdatePose";
         public const string UpdatePoseMask      = "UpdatePoseMask";
 
-
+        // monitor
         public const string UpdateMonitorData   = "UpdateMonitorData";
-        public const string ClearMonitorData    = "ClearMonitorData";        
+        public const string ClearMonitorData    = "ClearMonitorData";
+
+        // pose checker
+        public const string RightBicepsCurl     = "RightBicepsCurl";
+        public const string RightBicepsStraight = "RightBicepsStraight";
+        public const string LeftBicepsCurl      = "LeftBicepsCurl";
+        public const string LeftBicepsStraight  = "LeftBicepsStraight";
     }
 }
 
