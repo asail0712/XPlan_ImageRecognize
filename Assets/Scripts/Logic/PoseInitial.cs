@@ -28,7 +28,7 @@ namespace XPlan.ImageRecognize.Demo
             RegisterNotify<MediapipePoseMaskMsg>((msg) =>
             {
                 DirectCallUI<Mediapipe.Image>(UICommand.UpdatePoseMask, (msg.maskImg));
-            });         
+            });
         }
     }
 }

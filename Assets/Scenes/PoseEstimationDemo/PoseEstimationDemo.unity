@@ -1175,6 +1175,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 315520045927873496, guid: 71f62a94b0cc75548bcb5c2c55e28fe7,
         type: 3}
+      propertyPath: bMonitorActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 315520045927873496, guid: 71f62a94b0cc75548bcb5c2c55e28fe7,
+        type: 3}
       propertyPath: ptSnapDistance
       value: 0.05
       objectReference: {fileID: 0}

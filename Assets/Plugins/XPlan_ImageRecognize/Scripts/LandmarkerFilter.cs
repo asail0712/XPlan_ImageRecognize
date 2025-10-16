@@ -196,7 +196,7 @@ namespace XPlan.ImageRecognize
             return bboxArea >= minRatio && bboxArea <= maxRatio;
         }
 
-        public static Rect GetBoundingBox(this NormalizedLandmarks landmarks)
+        public static Rect GetBoundingBox(this NormalizedLandmarks landmarks, float lowerBound = 0.1f, float higherBound = 0.9f)
         {            
             List<float> xAxisList = new List<float>();
             List<float> yAxisList = new List<float>();
@@ -215,8 +215,8 @@ namespace XPlan.ImageRecognize
                 yAxisList.Add(pos.y);
             }
 
-            var xAxisValue = Percentile(xAxisList, 0.1f, 0.9f);
-            var yAxisValue = Percentile(yAxisList, 0.1f, 0.9f);
+            var xAxisValue = Percentile(xAxisList, lowerBound, higherBound);
+            var yAxisValue = Percentile(yAxisList, lowerBound, higherBound);
 
             // 若沒找到有效點，回傳空
             if (xAxisValue.Item1 > xAxisValue.Item2 || yAxisValue.Item1 > yAxisValue.Item2)

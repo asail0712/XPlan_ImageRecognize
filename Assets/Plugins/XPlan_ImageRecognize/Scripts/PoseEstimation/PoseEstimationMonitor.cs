@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using XPlan.Observe;
-
+using XPlan.Utility;
 using Rect = UnityEngine.Rect;
 
 namespace XPlan.ImageRecognize
@@ -14,13 +14,19 @@ namespace XPlan.ImageRecognize
         public float faceAng;
         public Rect rect;
         public float maskConverage;
+        public int imgWidth;
+        public int imgHeight;
+        public bool bMirror;
 
-        public PoseMonitorMsg(int uniqueID, float faceAng, Rect rect, float maskConverage)
+        public PoseMonitorMsg(int uniqueID, float faceAng, Rect rect, float maskConverage, int imgWidth, int imgHeight, bool bMirror)
         {
             this.uniqueID       = uniqueID;
             this.faceAng        = faceAng;
             this.rect           = rect;
             this.maskConverage  = maskConverage;
+            this.imgWidth       = imgWidth;
+            this.imgHeight      = imgHeight;
+            this.bMirror        = bMirror;
         }
     }
 
@@ -28,9 +34,19 @@ namespace XPlan.ImageRecognize
     {
         public PoseEstimationMonitor(PoseEstimationRunner poseRunner, bool bDebugMode, bool bMirror)
         {
+            int imgWidth            = 0;
+            int imgHeight           = 0;
+            List<int> selectedIdxs  = null;
+
+            poseRunner.imgInitFinish += (imgSource) =>
+            {
+                imgWidth    = imgSource.textureWidth;
+                imgHeight   = imgSource.textureHeight;
+            };
+
             poseRunner.resultReceived += (result) =>
             {
-                if(!bDebugMode)
+                if(!bDebugMode || imgWidth == 0 || imgHeight == 0 || selectedIdxs == null)
                 {
                     return;
                 }
@@ -46,15 +62,27 @@ namespace XPlan.ImageRecognize
                 List<NormalizedLandmarks> poseLandmarksList = result.poseLandmarks;
                 List<Mediapipe.Image> poseMaskImgList       = result.segmentationMasks;
 
-                for(int i = 0; i < poseLandmarksList.Count; ++i)
+                for(int i = 0; i < selectedIdxs.Count; ++i)
                 {
-                    float faceAng       = poseLandmarksList[i].GetFaceFrontAngle();
-                    Rect rect           = poseLandmarksList[i].GetBoundingBox();
-                    float maskConverage = poseMaskImgList[i].GetMaskCoverage();
+                    int selectIdx       = selectedIdxs[i];
 
-                    SendGlobalMsg<PoseMonitorMsg>(faceAng, rect, maskConverage);
+                    if(!poseLandmarksList.IsValidIndex(selectIdx))
+                    {
+                        continue;
+                    }
+
+                    float faceAng       = poseLandmarksList[selectIdx].GetFaceFrontAngle();
+                    Rect rect           = poseLandmarksList[selectIdx].GetBoundingBox();
+                    float maskConverage = poseMaskImgList[selectIdx].GetMaskCoverage();
+
+                    SendGlobalMsgAsync<PoseMonitorMsg>(selectIdx, faceAng, rect, maskConverage, imgWidth, imgHeight, bMirror);
                 }
             };
+
+            RegisterNotify<SelectindexesMsg>((msg) => 
+            {
+                selectedIdxs = msg.indexList;
+            });
         }
     }
 }

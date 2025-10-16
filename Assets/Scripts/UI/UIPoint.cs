@@ -8,9 +8,11 @@ namespace XPlan.ImageRecognize.Demo
 {
     public class UIPoint : MonoBehaviour
     {
+        [SerializeField] public Color color = Color.yellow;
+
         private Image img;
         private Vector3 dispVec;
-        public bool Enable { get; set; }
+        public float lastUpdateTime;
 
         public float X
         {
@@ -27,11 +29,14 @@ namespace XPlan.ImageRecognize.Demo
             get => new Vector2(X, Y);
         }
 
+        public bool Enable { get { return gameObject.activeSelf; } }
+
 
         private void Awake()
         {
-            dispVec = Vector3.zero;
-            img     = GetComponent<Image>();
+            dispVec     = Vector3.zero;
+            img         = GetComponent<Image>();
+            img.color   = color;
         }
 
         public void SetPos(Vector3 pos, float w, float h, bool bMirror)
@@ -40,13 +45,20 @@ namespace XPlan.ImageRecognize.Demo
             float yDisp = (0.5f - pos.y) * h;  // 垂直方向轉換 + 以中心為原點
             float zDisp = 0f;
 
-            dispVec     = new Vector3(xDisp, yDisp, zDisp);
+            dispVec         = new Vector3(xDisp, yDisp, zDisp);
+            lastUpdateTime  = Time.time;
+
+            gameObject.SetActive(true);
         }
 
         private void Update()
         {
             transform.localPosition = dispVec;
-            img.enabled             = Enable;
+            
+            if(Time.time - lastUpdateTime > 0.2f)
+            {
+                gameObject.SetActive(false);
+            }
         }
     }
 }

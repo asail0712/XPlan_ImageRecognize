@@ -18,7 +18,6 @@ namespace XPlan.ImageRecognize.Demo
         [SerializeField] private GameObject linePrefab;
         [SerializeField] private GameObject pointRoot;
         [SerializeField] private GameObject lineRoot;
-        [SerializeField] private GameObject centerRoot;
         [SerializeField] private RawImage screen;
 
         private static int MaxPose              = 3;
@@ -110,10 +109,9 @@ namespace XPlan.ImageRecognize.Demo
 
                 for (int i = 0; i < PerPoseMaxPointNum; ++i)
                 {
-                    int pointIndex                  = i + index * PerPoseMaxPointNum;
-                    pointList[pointIndex].Enable    = i < ptList.Count && ptList[i].IsValid();
-
-                    if (pointList[pointIndex].Enable)
+                    int pointIndex = i + index * PerPoseMaxPointNum;
+                    
+                    if (i < ptList.Count && ptList[i].IsValid())
                     {
                         pointList[pointIndex].SetPos(ptList[i].pos, screenWidth, screenHeight, bMirror);
                     }

@@ -24,6 +24,17 @@ namespace XPlan.ImageRecognize
         }
     }
 
+    public class SelectindexesMsg : MessageBase
+    {
+        public List<int> indexList;
+
+        public SelectindexesMsg(List<int> indexList)
+        {
+            this.indexList = indexList;
+        }
+    }
+
+
     public class PoseLandListMsg : MessageBase
     {
         public int index;
@@ -48,13 +59,6 @@ namespace XPlan.ImageRecognize
             this.ptList     = ptList;
             this.bIsMirror  = bIsMirror;
         }
-    }
-
-    public class DistanceInfo
-    {
-        public Vector2 point2D;
-        public Vector2 point3D;
-        public float dis;
     }
 
     public class MediapipeLandmarkListMsg : MessageBase
@@ -148,8 +152,10 @@ namespace XPlan.ImageRecognize
                     return;
                 }
 
+                selectedIdxs.Clear();
+
                 // 添加Pose 2D資料
-                AddPoseLandmark(currPoseCount, result);
+                AddPoseLandmark(result, ref currPoseCount);
 
                 // 依照Pose 2D條件選取適合的Pose 
                 FilterMatchPose(currPoseCount, result, ref selectedIdxs);
@@ -159,6 +165,9 @@ namespace XPlan.ImageRecognize
 
                 // 依照選中條件顯示對應的 Mask
                 ProcessPoseMask(currPoseCount, result, selectedIdxs);
+
+                // 將選中的index 做同步
+                SendMsgAsync<SelectindexesMsg>(selectedIdxs);
             };
         }
 
@@ -205,10 +214,12 @@ namespace XPlan.ImageRecognize
             }
         }
 
-        private void AddPoseLandmark(int currPoseCount, PoseLandmarkerResult result)
+        private void AddPoseLandmark(PoseLandmarkerResult result, ref int currPoseCount)
         {
             List<NormalizedLandmarks> poseLandmarksList = result.poseLandmarks;
             List<Mediapipe.Image> poseMaskImgList       = result.segmentationMasks;
+
+            currPoseCount = 0;
 
             /***************************************
              * 依照 pose數量 修改 pose2DList資料
@@ -238,11 +249,18 @@ namespace XPlan.ImageRecognize
 
                 // 加入pose資料
                 pose2DList[i].AddFrameLandmarks(poseLandmarksList[i].landmarks);
+
+                ++currPoseCount;
             }
         }
 
         private void FilterMatchPose(int currPoseCount, PoseLandmarkerResult result, ref List<int> closestIdxs)
         {
+            if(currPoseCount == 0)
+            {
+                return;
+            }
+
             /***************************************
              * 檢查 pose 過近時 要刪除其中一個
              * ************************************/
@@ -274,7 +292,7 @@ namespace XPlan.ImageRecognize
 
         private void ProcessPoseMask(int currPoseCount, PoseLandmarkerResult result, List<int> selectidxs)
         {
-            if(!bSegmentationMasks)
+            if (!bSegmentationMasks)
             {
                 return;
             }
@@ -295,15 +313,6 @@ namespace XPlan.ImageRecognize
             else
             {
                 SendGlobalMsg<MediapipePoseMaskMsg>(result.segmentationMasks[selectidxs[0]]);
-            }
-
-            // dispose mask data
-            if (result.segmentationMasks != null)
-            {
-                foreach (var mask in result.segmentationMasks)
-                {
-                    mask.Dispose();
-                }
             }
         }
 

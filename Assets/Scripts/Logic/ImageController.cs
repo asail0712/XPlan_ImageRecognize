@@ -12,6 +12,7 @@ namespace XPlan.ImageRecognize.Demo
             RegisterLogic(new ImageInitial());
             RegisterLogic(new MaskInitial());
             RegisterLogic(new PoseInitial());
+            RegisterLogic(new MonitorInitial());
         }
     }
 }
