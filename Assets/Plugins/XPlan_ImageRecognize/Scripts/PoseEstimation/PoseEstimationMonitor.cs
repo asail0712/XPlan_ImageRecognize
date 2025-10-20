@@ -76,9 +76,9 @@ namespace XPlan.ImageRecognize
 
                     float faceAng       = poseLandmarksList[selectIdx].GetFaceFrontAngle();
                     Rect rect           = poseLandmarksList[selectIdx].GetBoundingBox();
-                    float maskConverage = poseMaskImgList[selectIdx].GetMaskCoverage();
-                    Rect roiRect        = poseLandmarksList[selectIdx].GetBoundingBox();
-
+                    Rect roiRect        = poseLandmarksList[selectIdx].GetBoundingBox();                                    
+                    float maskConverage = poseMaskImgList == null?0f:poseMaskImgList[selectIdx].GetMaskCoverage();
+                    
                     SendGlobalMsgAsync<PoseMonitorMsg>(selectIdx, faceAng, rect, maskConverage, roiRect.width * roiRect.height, imgWidth, imgHeight, bMirror);
                 }
             };
