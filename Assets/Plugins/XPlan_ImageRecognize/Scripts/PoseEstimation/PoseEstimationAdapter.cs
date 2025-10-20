@@ -34,7 +34,6 @@ namespace XPlan.ImageRecognize
         }
     }
 
-
     public class PoseLandListMsg : MessageBase
     {
         public int index;
@@ -107,7 +106,7 @@ namespace XPlan.ImageRecognize
         private List<int> selectedIdxs;
 
 
-        public PoseEstimationAdapter(PoseEstimationRunner poseRunner, int numShowPose, bool bSegmentationMasks, bool bMirror, float ptSmoothAlpha, float ptSnapDistance)
+        public PoseEstimationAdapter(PoseEstimationRunner poseRunner, UserOrderType orderType, int numShowPose, bool bSegmentationMasks, bool bMirror, float ptSmoothAlpha, float ptSnapDistance)
         {
             this.bMirror            = bMirror;
             this.pose2DList         = new List<PoseLankInfo>();
@@ -160,7 +159,7 @@ namespace XPlan.ImageRecognize
                 AddPoseLandmark(result, ref currPoseCount);
 
                 // 依照Pose 2D條件選取適合的Pose 
-                FilterMatchPose(currPoseCount, result, ref selectedIdxs);
+                FilterMatchPose(currPoseCount, result, orderType, ref selectedIdxs);
 
                 // 依照選中條件顯示對應的 Pose3D
                 AddPoseWorldLandmark(currPoseCount, result, selectedIdxs);
@@ -261,7 +260,7 @@ namespace XPlan.ImageRecognize
             }
         }
 
-        private void FilterMatchPose(int currPoseCount, PoseLandmarkerResult result, ref List<int> closestIdxs)
+        private void FilterMatchPose(int currPoseCount, PoseLandmarkerResult result, UserOrderType orderType, ref List<int> closestIdxs)
         {
             if(currPoseCount == 0)
             {
@@ -284,16 +283,30 @@ namespace XPlan.ImageRecognize
             /*************************************************************
              * 依照 numShowPose 決定顯示幾個Pose (以靠近中間為主)
              * **********************************************************/
-            int filterNearestPose   = currPoseCount;
-            int finalPoseCount      = KeepClosestToCenter(ref pose2DList, ref closestIdxs);
+            int numFilterNearest    = currPoseCount;
+            closestIdxs             = pose2DList.OrderBy(orderType);
+            closestIdxs.RemoveRange(numShowPose, closestIdxs.Count - numShowPose); // 依照限定人數移除不需要的index
+
+            // 依照選中的資料清除不符合的data
+            for (int i = 0; i < pose2DList.Count; ++i)
+            {
+                if(closestIdxs.Contains(i))
+                {
+                    continue;
+                }
+
+                pose2DList[i].ClearLandmarks();
+            }
+
+            int finalPoseCount = closestIdxs.Count;
 
             if (finalPoseCount > 0)
             {
-                Debug.Log($"Total Pose Count: {totalPoseCount}, Filter Nearest Pose: {filterNearestPose}, Final Pose Count: {finalPoseCount}, Closest Index: {closestIdxs[0]}");
+                Debug.Log($"Total Pose Count: {totalPoseCount}, Filter Nearest Pose: {numFilterNearest}, Final Pose Count: {finalPoseCount}, Closest Index: {closestIdxs[0]}");
             }
             else
             {
-                Debug.Log($"Total Pose Count: {totalPoseCount}, Filter Nearest Pose: {filterNearestPose}, Final Pose Count: 0");
+                Debug.Log($"Total Pose Count: {totalPoseCount}, Filter Nearest Pose: {numFilterNearest}, Final Pose Count: 0");
             }
         }
 
@@ -393,49 +406,6 @@ namespace XPlan.ImageRecognize
             currPoseCount -= delIdxList.Count;
 
             return delIdxList.Count > 0;
-        }
-
-        private int KeepClosestToCenter(ref List<PoseLankInfo> poseList, ref List<int> closestPoseIndexs)
-        {
-            List<(int, float)> disSqrList = new List<(int, float)>();
-
-            for (int i = 0; i < poseList.Count; ++i)
-            {
-                // 為了判斷離中間的距離
-                disSqrList.Add((i, poseList[i].DisSqrToScreenCenter(false)));
-            }
-
-            disSqrList.Sort((x1, x2) =>
-            {
-                return x1.Item2.CompareTo(x2.Item2);
-            });
-
-            // 取前 numShowPose
-            for (int i = 0; i < disSqrList.Count; ++i)
-            {
-                int idx = disSqrList[i].Item1;
-
-                // 把過遠的資料移除
-                if (i >= numShowPose)
-                {
-                    poseList[idx].ClearLandmarks();
-                }
-            }
-
-            closestPoseIndexs.Clear();
-
-            // 依照與螢幕中間距離 排出由小到大的index
-            for (int i = 0; i < disSqrList.Count; ++i)
-            {
-                if(i >= numShowPose)
-                {
-                    break;
-                }
-
-                closestPoseIndexs.Add(disSqrList[i].Item1);
-            }
-
-            return closestPoseIndexs.Count;
         }
     }
 }

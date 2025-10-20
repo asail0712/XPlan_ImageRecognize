@@ -19,6 +19,7 @@ namespace XPlan.ImageRecognize
         [SerializeField] private bool bSegmentationMasks            = false;
 
         [Header("Runner Adapter 設定")]
+        [SerializeField] private UserOrderType orderType            = UserOrderType.Center;
         [SerializeField] private int numShowPose                    = 1;
         [SerializeField] private float ptSmoothAlpha                = 0.4f;
         [SerializeField] private float ptSnapDistance               = 0.15f;
@@ -45,7 +46,7 @@ namespace XPlan.ImageRecognize
 
         protected override void OnInitialLogic()
         {
-            RegisterLogic(new PoseEstimationAdapter(poseRunner, numShowPose, bSegmentationMasks, bMirror, ptSmoothAlpha, ptSnapDistance));
+            RegisterLogic(new PoseEstimationAdapter(poseRunner, orderType, numShowPose, bSegmentationMasks, bMirror, ptSmoothAlpha, ptSnapDistance));
             RegisterLogic(new PoseEstimationMonitor(poseRunner, bMonitorActive, bMirror));
         }
     }
