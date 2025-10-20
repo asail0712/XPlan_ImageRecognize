@@ -1,12 +1,15 @@
+using Mediapipe;
 using Mediapipe.Tasks.Components.Containers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
-using UnityEditor.Tilemaps;
 using UnityEngine;
 using XPlan.Utility;
 
+using Rect                  = UnityEngine.Rect;
+using NormalizedLandmark    = Mediapipe.Tasks.Components.Containers.NormalizedLandmark;
+using Landmark              = Mediapipe.Tasks.Components.Containers.Landmark;
 
 namespace XPlan.ImageRecognize
 {
@@ -241,6 +244,11 @@ namespace XPlan.ImageRecognize
             posePtList.Clear();
         }
 
+        public bool IsValid()
+        {
+            return !(posePtList == null || posePtList.Count == 0);
+        }
+
         public List<PTInfo> GetPtList()
         {
             return posePtList;
@@ -268,6 +276,35 @@ namespace XPlan.ImageRecognize
             }
 
             return (posePtList[leftHipIdx].pos + posePtList[rightHipIdx].pos) / 2f;
+        }
+
+        public UnityEngine.Rect GetROI(float lowerBound = 0.1f, float higherBound = 0.9f)
+        {
+            List<float> xAxisList = new List<float>();
+            List<float> yAxisList = new List<float>();
+
+            // 遍歷所有關節
+            foreach (PTInfo info in posePtList)
+            {
+                if (!info.IsValid())
+                    continue; // 無效關節略過
+
+                // 只取在畫面範圍內的點
+                if (info.x < 0f || info.x > 1f || info.y < 0f || info.y > 1f)
+                    continue;
+
+                xAxisList.Add(info.x);
+                yAxisList.Add(info.y);
+            }
+
+            var xAxisValue = LandmarkerFilter.Percentile(xAxisList, lowerBound, higherBound);
+            var yAxisValue = LandmarkerFilter.Percentile(yAxisList, lowerBound, higherBound);
+
+            // 若沒找到有效點，回傳空
+            if (xAxisValue.Item1 > xAxisValue.Item2 || yAxisValue.Item1 > yAxisValue.Item2)
+                return UnityEngine.Rect.zero;
+
+            return new UnityEngine.Rect(xAxisValue.Item1, yAxisValue.Item1, xAxisValue.Item2 - xAxisValue.Item1, yAxisValue.Item2 - yAxisValue.Item1);
         }
 
         public float DisSqrToScreenCenter(bool bVisualZ)
@@ -316,6 +353,5 @@ namespace XPlan.ImageRecognize
                 list.RemoveRange(size, list.Count - size);
             }
         }
-
     }
 }

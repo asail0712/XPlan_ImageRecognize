@@ -10,6 +10,7 @@ using XPlan.Utility;
 
 using Rect                  = UnityEngine.Rect;
 using NormalizedLandmark    = Mediapipe.Tasks.Components.Containers.NormalizedLandmark;
+using Landmark              = Mediapipe.Tasks.Components.Containers.Landmark;
 
 namespace XPlan.ImageRecognize
 {
@@ -225,6 +226,13 @@ namespace XPlan.ImageRecognize
             return new Rect(xAxisValue.Item1, yAxisValue.Item1, xAxisValue.Item2 - xAxisValue.Item1, yAxisValue.Item2 - yAxisValue.Item1);
         }
 
+        public static float GetDepthZ(this Landmarks landmarks)
+        {
+            Landmark lmNose = landmarks.landmarks[(int)BodyPoseType.Nose];
+
+            return lmNose.z; // 越近數值越小
+        }
+
         public static bool FindJointPos(this NormalizedLandmarks landmarks, BodyPoseType type, out Vector3 pos)
         {
             int idx = (int)type;
@@ -248,7 +256,7 @@ namespace XPlan.ImageRecognize
         /******************************************
          * 工具類
          * ***************************************/
-        private static (float, float) Percentile(List<float> data, float minPercentile, float maxPercentile)
+        public static (float, float) Percentile(List<float> data, float minPercentile, float maxPercentile)
         {
             if (data == null || data.Count == 0) return (0f, 0f);
 

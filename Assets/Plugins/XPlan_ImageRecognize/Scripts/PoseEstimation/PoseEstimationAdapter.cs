@@ -10,7 +10,9 @@ using XPlan.Interface;
 using XPlan.Observe;
 using XPlan.Utility;
 
-using Landmark = Mediapipe.Tasks.Components.Containers.Landmark;
+using Rect                  = UnityEngine.Rect;
+using NormalizedLandmark    = Mediapipe.Tasks.Components.Containers.NormalizedLandmark;
+using Landmark              = Mediapipe.Tasks.Components.Containers.Landmark;
 
 namespace XPlan.ImageRecognize
 {
@@ -281,7 +283,7 @@ namespace XPlan.ImageRecognize
             }
 
             /*************************************************************
-             * 依照 numShowPose 決定顯示幾個Pose (以靠近中間為主)
+             * 依照 orderType 與 numShowPose 決定顯示幾個Pose
              * **********************************************************/
             int numFilterNearest    = currPoseCount;
             closestIdxs             = pose2DList.OrderBy(orderType);

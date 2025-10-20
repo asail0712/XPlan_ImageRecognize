@@ -12,6 +12,7 @@ namespace XPlan.ImageRecognize.Demo
         public Rect rect;
         public float maskConverage;
         public bool bMirror;
+        public float roiArea;
 
         public PoseMonitorData() { }
 
@@ -22,6 +23,7 @@ namespace XPlan.ImageRecognize.Demo
             maskConverage   = msg.maskConverage;
             rect            = msg.rect;
             bMirror         = msg.bMirror;
+            roiArea         = msg.roiArea;
         }
     }
 

@@ -15,6 +15,8 @@ namespace XPlan.ImageRecognize.Demo
 
         [SerializeField] private Text angleTxt;
         [SerializeField] private Text maskCoverageTxt;
+        [SerializeField] private Text areaTxt;
+
         [SerializeField] private GameObject linePrefab;
         [SerializeField] private GameObject pointPrefab;
 
@@ -75,6 +77,7 @@ namespace XPlan.ImageRecognize.Demo
             
             angleTxt.text           = $"面向角度 {data.faceAng.ToString("0.0")}";
             maskCoverageTxt.text    = $"遮罩覆蓋率 {(data.maskConverage * 100f).ToString("0.0")}%";
+            areaTxt.text            = $"ROI面積為 {data.roiArea.ToString("0.000")}";
 
             Rect rect               = new Rect();
             rect.min                = PosToScreen(data.rect.min, (int)width, (int)height, data.bMirror);

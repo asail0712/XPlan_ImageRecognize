@@ -14,16 +14,18 @@ namespace XPlan.ImageRecognize
         public float faceAng;
         public Rect rect;
         public float maskConverage;
+        public float roiArea;
         public int imgWidth;
         public int imgHeight;
         public bool bMirror;
 
-        public PoseMonitorMsg(int uniqueID, float faceAng, Rect rect, float maskConverage, int imgWidth, int imgHeight, bool bMirror)
+        public PoseMonitorMsg(int uniqueID, float faceAng, Rect rect, float maskConverage, float roiArea, int imgWidth, int imgHeight, bool bMirror)
         {
             this.uniqueID       = uniqueID;
             this.faceAng        = faceAng;
             this.rect           = rect;
             this.maskConverage  = maskConverage;
+            this.roiArea        = roiArea;
             this.imgWidth       = imgWidth;
             this.imgHeight      = imgHeight;
             this.bMirror        = bMirror;
@@ -36,7 +38,7 @@ namespace XPlan.ImageRecognize
         {
             int imgWidth            = 0;
             int imgHeight           = 0;
-            List<int> selectedIdxs  = null;
+            List<int> selectedIdxs  = new List<int>();
 
             poseRunner.imgInitFinish += (imgSource) =>
             {
@@ -60,6 +62,7 @@ namespace XPlan.ImageRecognize
                 }
 
                 List<NormalizedLandmarks> poseLandmarksList = result.poseLandmarks;
+                List<Landmarks> poseWorldLandmarksList      = result.poseWorldLandmarks;
                 List<Mediapipe.Image> poseMaskImgList       = result.segmentationMasks;
 
                 for(int i = 0; i < selectedIdxs.Count; ++i)
@@ -74,14 +77,16 @@ namespace XPlan.ImageRecognize
                     float faceAng       = poseLandmarksList[selectIdx].GetFaceFrontAngle();
                     Rect rect           = poseLandmarksList[selectIdx].GetBoundingBox();
                     float maskConverage = poseMaskImgList[selectIdx].GetMaskCoverage();
+                    Rect roiRect        = poseLandmarksList[selectIdx].GetBoundingBox();
 
-                    SendGlobalMsgAsync<PoseMonitorMsg>(selectIdx, faceAng, rect, maskConverage, imgWidth, imgHeight, bMirror);
+                    SendGlobalMsgAsync<PoseMonitorMsg>(selectIdx, faceAng, rect, maskConverage, roiRect.width * roiRect.height, imgWidth, imgHeight, bMirror);
                 }
             };
 
             RegisterNotify<SelectindexesMsg>((msg) => 
             {
-                selectedIdxs = msg.indexList;
+                selectedIdxs.Clear();
+                selectedIdxs.AddRange(msg.indexList);
             });
         }
     }
