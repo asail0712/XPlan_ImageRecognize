@@ -48,6 +48,6 @@ namespace XPlan.ImageRecognize
         {
             RegisterLogic(new PoseEstimationAdapter(poseRunner, orderType, numShowPose, bSegmentationMasks, bMirror, ptSmoothAlpha, ptSnapDistance));
             RegisterLogic(new PoseEstimationMonitor(poseRunner, bMonitorActive, bMirror));
-        }
+        }        
     }
 }

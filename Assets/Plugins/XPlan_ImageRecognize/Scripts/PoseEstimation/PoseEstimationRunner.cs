@@ -49,6 +49,9 @@ namespace XPlan.ImageRecognize
             taskApi         = PoseLandmarker.CreateFromOptions(options, GpuManager.GpuResources);
             var imageSource = ImageSourceProvider.ImageSource;
 
+            // 選擇image source
+            InitialImgSource(imageSource);
+
             yield return imageSource.Play();
 
             if (!imageSource.isPrepared)
@@ -176,6 +179,29 @@ namespace XPlan.ImageRecognize
                     mask.Dispose();
                 }
             }
+        }
+
+        private void InitialImgSource(ImageSource imageSource)
+        {
+            if (WebCamTexture.devices.Length == 0)
+            {
+                throw new System.Exception("沒有Camera");
+            }
+
+            int sourceIdx = 0;
+
+            for (int i = 0; i < WebCamTexture.devices.Length; ++i)
+            {
+                WebCamDevice device = WebCamTexture.devices[i];
+
+                if (device.isFrontFacing)
+                {
+                    sourceIdx = i;
+                    break;
+                }
+            }
+
+            imageSource.SelectSource(sourceIdx);
         }
     }
 }
